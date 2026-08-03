@@ -18,7 +18,7 @@
         <div class="max-w-xl mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/80 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <a href="index.html" class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
-                <span class="text-xs font-bold text-cyan-400">Calendar & Schedule</span>
+                <span class="text-xs font-bold text-cyan-400">Calendar & Schedule (28 Columns)</span>
             </div>
             <div class="flex items-center space-x-2">
                 <a href="summary.html" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-xl transition border border-slate-700">Summary</a>
@@ -93,7 +93,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLukoukLASlaPsBj0ApZoXqTbzGcqfWCD1YSg5yLyE8B4R6QPCo2gPZixBG9m03uaxLw/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxot3Icntv6plIlm1q-V62facX6LT6EuTXKBiVvrXXfN_gi33wZZMByeMQuV8FMfyVqvQ/exec";
         let leads = [];
         let currentDate = new Date();
         let selectedDateKey = '';
@@ -121,7 +121,6 @@
         };
 
         window.onload = function() {
-            // Default selected date to today
             let today = new Date();
             selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             fetchLeadsFromSheet();
@@ -131,7 +130,27 @@
             try {
                 let response = await fetch(WEB_APP_URL);
                 let data = await response.json();
-                leads = data;
+                
+                leads = data.map((item, index) => ({
+                    id: item.id || (index + 1),
+                    sNo: item["Sr No"] || item.sNo || (index + 1),
+                    ctDate: item["CT Date"] || item.ctDate || "",
+                    unit: item["Unit"] || item.unit || "Mumbai-2",
+                    customerType: item["Customer Type"] || item.customerType || "Prime",
+                    custId: item["Cust ID (If UH Allows)"] !== undefined ? String(item["Cust ID (If UH Allows)"]) : (item.custId ? String(item.custId) : ""),
+                    customerName: item["Customer Name"] || item.customerName || "",
+                    callMeetingType: item["Call/Meeting Type"] || item.callMeetingType || "Dialer/Call",
+                    expectedPremium: item["Expected Premium"] || item.expectedPremium || "",
+                    planPitched: item["Plan Pitched"] || item.planPitched || "",
+                    status: item["CT/Lead Status"] || item.status || "New Lead",
+                    followupDate: item["Followup Date"] || item.followupDate || "",
+                    fls: item["FLS - Insurer"] || item.fls || "Mahfuz",
+                    remark: item["FLS Detailed Lead Remark & Date"] || item.remark || "",
+                    rmName: item["RM Name"] || item.rmName || "",
+                    vrbh: item["VRBH"] || item.vrbh || "Rahul",
+                    uhName: item["UH Name"] || item.uhName || "Amit Chodankar"
+                }));
+
                 renderCalendar();
                 updateBadge();
                 showDateDetails(selectedDateKey);
@@ -205,12 +224,10 @@
                 let bgClass = "bg-slate-900/60 border-slate-800 text-slate-300";
                 let textStyle = "font-normal";
 
-                // Red bold for holidays
                 if (isHoliday) {
                     textStyle = "text-rose-500 font-extrabold text-sm";
                 }
 
-                // Green bold for followups
                 if (hasFollowup) {
                     textStyle = "text-emerald-400 font-extrabold text-sm underline decoration-emerald-500 underline-offset-4";
                 }
@@ -287,30 +304,39 @@
 
                 dayFollowups.forEach(lead => {
                     let badgeColor = 'bg-amber-950 text-amber-300 border border-amber-800';
-                    if(lead.status === 'Closed') badgeColor = 'bg-sky-950 text-sky-300 border border-sky-800';
-                    if(lead.status === 'New Lead') badgeColor = 'bg-indigo-950 text-indigo-300 border border-indigo-800';
+                    let currentStatus = (lead.status || '').toLowerCase();
+                    if(currentStatus.includes('close')) badgeColor = 'bg-sky-950 text-sky-300 border border-sky-800';
+                    else if(currentStatus.includes('new')) badgeColor = 'bg-indigo-950 text-indigo-300 border border-indigo-800';
+
+                    let phoneNum = lead.custId ? String(lead.custId).trim() : '';
 
                     let card = document.createElement('div');
                     card.className = "bg-[#182c4d] p-3 rounded-xl border border-slate-700 flex flex-col space-y-2 text-xs shadow";
                     card.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div>
-                                <h4 class="font-bold text-sm text-white">${lead.customerName}</h4>
-                                <p class="text-slate-400 mt-0.5"><i class="fa-solid fa-phone text-[10px] mr-1 text-emerald-400"></i><span class="text-white font-medium">${lead.phone}</span> | <i class="fa-solid fa-location-dot ml-1"></i> ${lead.location || 'Mumbai-2'}</p>
+                                <h4 class="font-bold text-sm text-white">${lead.customerName || 'N/A'}</h4>
+                                <p class="text-slate-400 mt-0.5"><i class="fa-solid fa-id-badge text-[10px] mr-1 text-emerald-400"></i><span class="text-white font-semibold">${phoneNum || 'No Number'}</span> | <i class="fa-solid fa-location-dot ml-1"></i> ${lead.unit || 'Mumbai-2'}</p>
                             </div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${lead.status}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${lead.status || 'N/A'}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-1 bg-slate-900/60 p-2 rounded text-[11px] text-slate-300">
                             <div><b>FLS:</b> <span class="text-cyan-400 font-semibold">${lead.fls || 'N/A'}</span></div>
                             <div><b>Exp. Premium:</b> ₹${lead.expectedPremium || '0'}</div>
                             <div><b>RM:</b> ${lead.rmName || '-'}</div>
-                            <div><b>Supervisor:</b> ${lead.supervisorName || '-'}</div>
-                            <div class="col-span-2 text-cyan-300"><b>Financials:</b> ${lead.financials || 'N/A'}</div>
+                            <div><b>VRBH:</b> <span class="text-amber-400 font-semibold">${lead.vrbh || '-'}</span></div>
+                            <div class="col-span-2 text-cyan-300"><b>Plan:</b> ${lead.planPitched || 'N/A'}</div>
                         </div>
-                        <div class="flex justify-end pt-1">
-                            <a href="tel:${lead.phone}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-bold flex items-center space-x-1">
-                                <i class="fa-solid fa-phone text-[10px]"></i> <span>Call Client</span>
-                            </a>
+                        <div class="flex justify-between items-center pt-1">
+                            <div class="flex space-x-2">
+                                ${phoneNum !== '' ? `
+                                <a href="tel:${phoneNum}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-semibold flex items-center space-x-1 shadow">
+                                    <i class="fa-solid fa-phone text-[10px]"></i> <span>Call</span>
+                                </a>
+                                <a href="https://wa.me/91${phoneNum}?text=Hello%20${encodeURIComponent(lead.customerName || '')},%20regarding%20your%20follow-up..." target="_blank" class="bg-green-600 hover:bg-green-500 text-white px-2.5 py-1 rounded-lg font-semibold flex items-center space-x-1 shadow">
+                                    <i class="fa-brands fa-whatsapp"></i> <span>Msg</span>
+                                </a>` : `<span class="text-[10px] text-slate-400 italic">No phone available</span>`}
+                            </div>
                         </div>
                     `;
                     content.appendChild(card);
@@ -323,9 +349,10 @@
         }
 
         function updateBadge() {
-            const followupCount = leads.filter(l => l.status === 'Follow up').length;
+            const followupCount = leads.filter(l => (l.status || '').toLowerCase().includes('follow')).length;
             document.getElementById('badgeCount').innerText = followupCount;
         }
     </script>
 </body>
 </html>
+
