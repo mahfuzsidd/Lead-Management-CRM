@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadPulse - Summary & FLS Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b192c] text-white min-h-screen pb-28">
+
+    <!-- FLOATING TOP HEADER BAR -->
+    <div class="sticky top-3 z-40 px-4 mb-3">
+        <div class="max-w-4xl mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/85 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
+                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">FLS Performance Summary</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center space-x-1">
+                    <i class="fa-solid fa-download text-[10px]"></i> <span>Export Excel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4 pt-1">
+
+        <!-- FLS Summary Cards Section -->
+        <div class="mb-6">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">FLS-Wise Performance & Status Counts</h3>
+            <div id="flsSummaryContainer" class="space-y-4">
+                <p class="text-xs text-slate-400 text-center py-4">Loading FLS summary from Google Sheet...</p>
+            </div>
+        </div>
+
+        <!-- Horizontal Border Separator -->
+        <div class="border-t border-slate-700 my-6"></div>
+
+        <!-- Excel-Like Complete Sheet Table View -->
+        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 shadow-xl">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Complete Sheet Data (Excel View)</h3>
+                <span id="totalSheetEntries" class="text-[11px] text-cyan-400 font-semibold">0 Entries</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[11px] text-slate-300 whitespace-nowrap">
+                    <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-700">
+                        <tr>
+                            <th class="p-2">S No</th>
+                            <th class="p-2">Date</th>
+                            <th class="p-2">Location</th>
+                            <th class="p-2">Customer Name</th>
+                            <th class="p-2">Phone</th>
+                            <th class="p-2">Illustration</th>
+                            <th class="p-2">F2F</th>
+                            <th class="p-2">CRM</th>
+                            <th class="p-2">FLS</th>
+                            <th class="p-2">RM Name</th>
+                            <th class="p-2">Supervisor</th>
+                            <th class="p-2">UH Name</th>
+                            <th class="p-2">Status</th>
+                            <th class="p-2">Followup Date</th>
+                            <th class="p-2">Exp. Premium</th>
+                            <th class="p-2">Closer Date</th>
+                            <th class="p-2">Premium Closed</th>
+                            <th class="p-2">Remark</th>
+                            <th class="p-2">Financials (CTC/Bal/Limit)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sheetTableBody" class="divide-y divide-slate-800">
+                        <tr>
+                            <td colspan="19" class="text-center py-4 text-slate-400">Loading sheet rows...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar with Labels -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#071321] border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40">
+        <a href="index.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="leads.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-user-group text-base"></i>
+            <span class="text-[10px] font-medium">Leads</span>
+        </a>
+        <a href="summary.html" class="text-cyan-400 flex flex-col items-center space-y-1 relative">
+            <i class="fa-solid fa-list-check text-base"></i>
+            <span class="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-bold px-1 rounded-full" id="badgeCount">0</span>
+            <span class="text-[10px] font-medium">Summary</span>
+        </a>
+        <a href="calendar.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-calendar text-base"></i>
+            <span class="text-[10px] font-medium">Calendar</span>
+        </a>
+    </nav>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLukoukLASlaPsBj0ApZoXqTbzGcqfWCD1YSg5yLyE8B4R6QPCo2gPZixBG9m03uaxLw/exec";
+        let leads = [];
+
+        window.onload = function() {
+            fetchLeadsFromSheet();
+        };
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            try {
+                let d = new Date(dateString);
+                if (isNaN(d.getTime())) return dateString;
+                let day = String(d.getDate()).padStart(2, '0');
+                let month = String(d.getMonth() + 1).padStart(2, '0');
+                let year = d.getFullYear();
+                return `${day}-${month}-${year}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        async function fetchLeadsFromSheet() {
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                leads = data;
+                renderFlsSummary();
+                renderExcelTable();
+                updateBadge();
+            } catch (error) {
+                console.error("Error fetching sheet data:", error);
+                document.getElementById('flsSummaryContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Failed to load FLS data.</p>`;
+                document.getElementById('sheetTableBody').innerHTML = `<tr><td colspan="19" class="text-center py-4 text-rose-400">Failed to load table rows.</td></tr>`;
+            }
+        }
+
+        function renderFlsSummary() {
+            const container = document.getElementById('flsSummaryContainer');
+            container.innerHTML = '';
+
+            // Group leads by FLS name
+            let flsGroups = {};
+            leads.forEach(l => {
+                let flsName = l.fls && l.fls.trim() !== "" ? l.fls.trim() : "Unassigned FLS";
+                if (!flsGroups[flsName]) {
+                    flsGroups[flsName] = {
+                        total: 0,
+                        newLead: 0,
+                        followup: 0,
+                        closed: 0,
+                        notInterested: 0,
+                        noContact: 0,
+                        premiumClosed: 0
+                    };
+                }
+                flsGroups[flsName].total++;
+                if (l.status === 'New Lead') flsGroups[flsName].newLead++;
+                if (l.status === 'Follow up') flsGroups[flsName].followup++;
+                if (l.status === 'Closed') {
+                    flsGroups[flsName].closed++;
+                    let prem = parseFloat(l.premiumClosed) || 0;
+                    flsGroups[flsName].premiumClosed += prem;
+                }
+                if (l.status === 'Not Interested') flsGroups[flsName].notInterested++;
+                if (l.status === 'No Contact') flsGroups[flsName].noContact++;
+            });
+
+            let flsKeys = Object.keys(flsGroups);
+            if (flsKeys.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No FLS data available.</p>`;
+                return;
+            }
+
+            flsKeys.forEach(fls => {
+                let data = flsGroups[fls];
+                let card = document.createElement('div');
+                card.className = "bg-[#10223b] p-4 rounded-2xl border border-slate-700/60 shadow-lg flex flex-col space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+                            <h4 class="text-sm font-extrabold text-white">${fls}</h4>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-slate-900 border border-slate-700 px-3 py-1 rounded-xl text-xs font-bold text-emerald-400 shadow">
+                                <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Closed: ₹${data.premiumClosed.toLocaleString('en-IN')}
+                            </span>
+                            <span class="bg-cyan-950 border border-cyan-800 text-cyan-300 text-xs font-bold px-2.5 py-1 rounded-xl">
+                                Total: ${data.total}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="block text-[10px] text-slate-400 uppercase font-bold">New Lead</span>
+                            <span class="text-sm font-black text-indigo-400">${data.newLead}</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Follow up</span>
+                            <span class="text-sm font-black text-amber-400">${data.followup}</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Closed</span>
+                            <span class="text-sm font-black text-sky-400">${data.closed}</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Not Int.</span>
+                            <span class="text-sm font-black text-rose-400">${data.notInterested}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderExcelTable() {
+            const tbody = document.getElementById('sheetTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('totalSheetEntries').innerText = `${leads.length} Entries`;
+
+            if (leads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="19" class="text-center py-4 text-slate-500">No entries found in sheet.</td></tr>`;
+                return;
+            }
+
+            leads.forEach((l, index) => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50 transition";
+                tr.innerHTML = `
+                    <td class="p-2 font-bold">${l.sNo || index + 1}</td>
+                    <td class="p-2">${formatDate(l.date)}</td>
+                    <td class="p-2">${l.location || 'Mumbai-2'}</td>
+                    <td class="p-2 font-bold text-white">${l.customerName || '-'}</td>
+                    <td class="p-2">${l.phone || '-'}</td>
+                    <td class="p-2">${l.illustration || '-'}</td>
+                    <td class="p-2">${l.f2f || '-'}</td>
+                    <td class="p-2">${l.crm || '-'}</td>
+                    <td class="p-2 text-cyan-400 font-semibold">${l.fls || '-'}</td>
+                    <td class="p-2">${l.rmName || '-'}</td>
+                    <td class="p-2">${l.supervisorName || '-'}</td>
+                    <td class="p-2">${l.uhName || 'Amit Chodankar'}</td>
+                    <td class="p-2 font-bold">${l.status || '-'}</td>
+                    <td class="p-2">${formatDate(l.followupDate)}</td>
+                    <td class="p-2">₹${l.expectedPremium || '0'}</td>
+                    <td class="p-2">${formatDate(l.closerDate)}</td>
+                    <td class="p-2 text-emerald-400 font-bold">₹${l.premiumClosed || '0'}</td>
+                    <td class="p-2 italic text-slate-400">${l.dateWithRemark || '-'}</td>
+                    <td class="p-2 text-cyan-300 font-mono">${l.financials || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateBadge() {
+            const followupCount = leads.filter(l => l.status === 'Follow up').length;
+            document.getElementById('badgeCount').innerText = followupCount;
+        }
+
+        function exportToCSV() {
+            if (leads.length === 0) { alert('No data to export.'); return; }
+            let csv = "S No,Date,Location,Customer Name,Phone,Illustration,F2F,CRM,FLS,RM Name,Supervisor Name,UH Name,Status,Followup Date,Expected Premium,Closer Date,Premium Closed,Date with Remark,CTC || AC Bal || CC Limit\n";
+            leads.forEach(l => {
+                csv += `"${l.sNo}","${l.date || ''}","${l.location || 'Mumbai-2'}","${l.customerName}","${l.phone}","${l.illustration || ''}","${l.f2f || ''}","${l.crm || ''}","${l.fls || ''}","${l.rmName || ''}","${l.supervisorName || ''}","${l.uhName || 'Amit Chodankar'}","${l.status}","${l.followupDate || ''}","${l.expectedPremium || ''}","${l.closerDate || ''}","${l.premiumClosed || ''}","${l.dateWithRemark || ''}","${l.financials || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "complete_sheet_summary.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

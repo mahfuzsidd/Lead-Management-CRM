@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadPulse - Follow-up & Holiday Calendar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b192c] text-white min-h-screen pb-28">
+
+    <!-- FLOATING TOP HEADER BAR -->
+    <div class="sticky top-3 z-40 px-4 mb-3">
+        <div class="max-w-xl mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/80 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
+                <span class="text-xs font-bold text-cyan-400">Calendar & Schedule</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="summary.html" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-xl transition border border-slate-700">Summary</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-xl mx-auto p-4 pt-1">
+
+        <!-- Calendar Month Header Control -->
+        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 mb-4 shadow-lg flex justify-between items-center">
+            <button onclick="changeMonth(-1)" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <h2 id="calendarMonthTitle" class="text-sm font-extrabold text-cyan-400 tracking-wide uppercase">Month Year</h2>
+            <button onclick="changeMonth(1)" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Calendar Grid Container -->
+        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 shadow-xl mb-6">
+            <!-- Days of Week Header -->
+            <div class="grid grid-cols-7 gap-1 text-center mb-3">
+                <span class="text-xs font-bold text-rose-500 uppercase">S</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">M</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">T</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">W</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">T</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">F</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">S</span>
+            </div>
+            <!-- Days Matrix Grid -->
+            <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5">
+                <!-- Dynamic days load here -->
+            </div>
+        </div>
+
+        <!-- Selected Date Details Section (Below Calendar) -->
+        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 shadow-xl">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                <h3 id="selectedDateHeader" class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Select a date to view details</h3>
+                <span id="selectedDateBadge" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-semibold">No selection</span>
+            </div>
+            <div id="selectedDateContent" class="space-y-3">
+                <p class="text-xs text-slate-400 text-center py-4">Click any date in the calendar above to inspect holidays or follow-ups.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar with Labels -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#071321] border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40">
+        <a href="index.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="leads.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-user-group text-base"></i>
+            <span class="text-[10px] font-medium">Leads</span>
+        </a>
+        <a href="summary.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1 relative">
+            <i class="fa-solid fa-list-check text-base"></i>
+            <span class="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-bold px-1 rounded-full" id="badgeCount">0</span>
+            <span class="text-[10px] font-medium">Summary</span>
+        </a>
+        <a href="calendar.html" class="text-cyan-400 flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-calendar text-base"></i>
+            <span class="text-[10px] font-medium">Calendar</span>
+        </a>
+    </nav>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLukoukLASlaPsBj0ApZoXqTbzGcqfWCD1YSg5yLyE8B4R6QPCo2gPZixBG9m03uaxLw/exec";
+        let leads = [];
+        let currentDate = new Date();
+        let selectedDateKey = '';
+
+        // Maharashtra Bank Holidays List
+        const mhHolidays = {
+            "2026-01-26": "Republic Day",
+            "2026-02-19": "Shivaji Maharaj Jayanti",
+            "2026-03-21": "Id-ul-Fitr",
+            "2026-03-26": "Ram Navami",
+            "2026-03-31": "Mahavir Jayanti",
+            "2026-04-03": "Good Friday",
+            "2026-04-14": "Ambedkar Jayanti",
+            "2026-05-01": "Maharashtra Day",
+            "2026-05-28": "Bakri Eid",
+            "2026-06-27": "Muharram",
+            "2026-08-15": "Independence Day",
+            "2026-08-27": "Milad-un-Nabi",
+            "2026-09-04": "Ganesh Chaturthi",
+            "2026-10-02": "Gandhi Jayanti",
+            "2026-10-20": "Dussehra",
+            "2026-11-09": "Diwali",
+            "2026-11-24": "Guru Nanak Jayanti",
+            "2026-12-25": "Christmas"
+        };
+
+        window.onload = function() {
+            // Default selected date to today
+            let today = new Date();
+            selectedDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            fetchLeadsFromSheet();
+        };
+
+        async function fetchLeadsFromSheet() {
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                leads = data;
+                renderCalendar();
+                updateBadge();
+                showDateDetails(selectedDateKey);
+            } catch (error) {
+                console.error("Error loading calendar leads:", error);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarDaysGrid');
+            grid.innerHTML = '';
+
+            let year = currentDate.getFullYear();
+            let month = currentDate.getMonth();
+
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('calendarMonthTitle').innerText = `${monthNames[month]} ${year}`;
+
+            let firstDayIndex = new Date(year, month, 1).getDay();
+            let totalDays = new Date(year, month + 1, 0).getDate();
+
+            let followupMap = {};
+            leads.forEach(l => {
+                if (l.followupDate) {
+                    let fDateClean = l.followupDate.split('T')[0];
+                    if (!followupMap[fDateClean]) {
+                        followupMap[fDateClean] = [];
+                    }
+                    followupMap[fDateClean].push(l);
+                }
+            });
+
+            // Blank spaces for offset
+            for (let i = 0; i < firstDayIndex; i++) {
+                let emptyCell = document.createElement('div');
+                emptyCell.className = "h-14 bg-slate-900/20 rounded-xl opacity-20";
+                grid.appendChild(emptyCell);
+            }
+
+            // Render days
+            for (let day = 1; day <= totalDays; day++) {
+                let dayStr = String(day).padStart(2, '0');
+                let monthStr = String(month + 1).padStart(2, '0');
+                let dateKey = `${year}-${monthStr}-${dayStr}`;
+
+                let cellDate = new Date(year, month, day);
+                let dayOfWeek = cellDate.getDay();
+
+                let isSecondOrFourthSat = false;
+                if (dayOfWeek === 6) {
+                    let satCount = Math.floor((day - 1) / 7) + 1;
+                    if (satCount === 2 || satCount === 4) {
+                        isSecondOrFourthSat = true;
+                    }
+                }
+
+                let isSunday = (dayOfWeek === 0);
+                let holidayReason = mhHolidays[dateKey];
+                let isHoliday = isSunday || isSecondOrFourthSat || holidayReason;
+
+                let dayFollowups = followupMap[dateKey] || [];
+                let hasFollowup = dayFollowups.length > 0;
+
+                let cell = document.createElement('div');
+                
+                let bgClass = "bg-slate-900/60 border-slate-800 text-slate-300";
+                let textStyle = "font-normal";
+
+                // Red bold for holidays
+                if (isHoliday) {
+                    textStyle = "text-rose-500 font-extrabold text-sm";
+                }
+
+                // Green bold for followups
+                if (hasFollowup) {
+                    textStyle = "text-emerald-400 font-extrabold text-sm underline decoration-emerald-500 underline-offset-4";
+                }
+
+                if (dateKey === selectedDateKey) {
+                    bgClass += " ring-2 ring-cyan-500 bg-slate-800";
+                }
+
+                cell.className = `h-14 rounded-xl border flex flex-col items-center justify-center transition cursor-pointer relative ${bgClass}`;
+                cell.onclick = () => {
+                    selectedDateKey = dateKey;
+                    renderCalendar();
+                    showDateDetails(dateKey);
+                };
+
+                cell.innerHTML = `
+                    <span class="${textStyle}">${day}</span>
+                    <div class="flex space-x-1 mt-0.5">
+                        ${isHoliday ? '<span class="w-1 h-1 bg-rose-500 rounded-full"></span>' : ''}
+                        ${hasFollowup ? '<span class="w-1 h-1 bg-emerald-400 rounded-full"></span>' : ''}
+                    </div>
+                `;
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function showDateDetails(dateKey) {
+            const header = document.getElementById('selectedDateHeader');
+            const badge = document.getElementById('selectedDateBadge');
+            const content = document.getElementById('selectedDateContent');
+
+            header.innerText = `Details for ${dateKey}`;
+            content.innerHTML = '';
+
+            let holidayReason = mhHolidays[dateKey];
+            let cellDate = new Date(dateKey);
+            let dayOfWeek = cellDate.getDay();
+            if (!holidayReason) {
+                if (dayOfWeek === 0) holidayReason = "Sunday Weekly Off";
+                else if (dayOfWeek === 6) {
+                    let dayNum = parseInt(dateKey.split('-')[2]);
+                    let satCount = Math.floor((dayNum - 1) / 7) + 1;
+                    if (satCount === 2) holidayReason = "2nd Saturday Bank Holiday";
+                    if (satCount === 4) holidayReason = "4th Saturday Bank Holiday";
+                }
+            }
+
+            let dayFollowups = leads.filter(l => l.followupDate && l.followupDate.split('T')[0] === dateKey);
+
+            let totalItemsCount = (holidayReason ? 1 : 0) + dayFollowups.length;
+            badge.innerText = `${totalItemsCount} Event(s)`;
+
+            if (holidayReason) {
+                let holCard = document.createElement('div');
+                holCard.className = "bg-rose-950/60 p-3 rounded-xl border border-rose-800 text-xs text-rose-200 flex items-center space-x-3";
+                holCard.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-rose-400 uppercase font-bold">Holiday / Event</span>
+                        <h4 class="font-extrabold text-white text-sm">${holidayReason}</h4>
+                    </div>
+                `;
+                content.appendChild(holCard);
+            }
+
+            if (dayFollowups.length > 0) {
+                let fTitle = document.createElement('p');
+                fTitle.className = "text-[11px] font-bold text-slate-400 uppercase tracking-wider pt-1";
+                fTitle.innerText = `Follow-up Leads (${dayFollowups.length})`;
+                content.appendChild(fTitle);
+
+                dayFollowups.forEach(lead => {
+                    let badgeColor = 'bg-amber-950 text-amber-300 border border-amber-800';
+                    if(lead.status === 'Closed') badgeColor = 'bg-sky-950 text-sky-300 border border-sky-800';
+                    if(lead.status === 'New Lead') badgeColor = 'bg-indigo-950 text-indigo-300 border border-indigo-800';
+
+                    let card = document.createElement('div');
+                    card.className = "bg-[#182c4d] p-3 rounded-xl border border-slate-700 flex flex-col space-y-2 text-xs shadow";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm text-white">${lead.customerName}</h4>
+                                <p class="text-slate-400 mt-0.5"><i class="fa-solid fa-phone text-[10px] mr-1 text-emerald-400"></i><span class="text-white font-medium">${lead.phone}</span> | <i class="fa-solid fa-location-dot ml-1"></i> ${lead.location || 'Mumbai-2'}</p>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${lead.status}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1 bg-slate-900/60 p-2 rounded text-[11px] text-slate-300">
+                            <div><b>FLS:</b> <span class="text-cyan-400 font-semibold">${lead.fls || 'N/A'}</span></div>
+                            <div><b>Exp. Premium:</b> ₹${lead.expectedPremium || '0'}</div>
+                            <div><b>RM:</b> ${lead.rmName || '-'}</div>
+                            <div><b>Supervisor:</b> ${lead.supervisorName || '-'}</div>
+                            <div class="col-span-2 text-cyan-300"><b>Financials:</b> ${lead.financials || 'N/A'}</div>
+                        </div>
+                        <div class="flex justify-end pt-1">
+                            <a href="tel:${lead.phone}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-bold flex items-center space-x-1">
+                                <i class="fa-solid fa-phone text-[10px]"></i> <span>Call Client</span>
+                            </a>
+                        </div>
+                    `;
+                    content.appendChild(card);
+                });
+            }
+
+            if (!holidayReason && dayFollowups.length === 0) {
+                content.innerHTML += `<p class="text-xs text-slate-400 text-center py-4">No follow-ups or holidays on this date.</p>`;
+            }
+        }
+
+        function updateBadge() {
+            const followupCount = leads.filter(l => l.status === 'Follow up').length;
+            document.getElementById('badgeCount').innerText = followupCount;
+        }
+    </script>
+</body>
+</html>

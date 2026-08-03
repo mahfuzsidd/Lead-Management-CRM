@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadPulse - All Leads Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b192c] text-white min-h-screen pb-28">
+
+    <!-- FLOATING TOP HEADER BAR -->
+    <div class="sticky top-3 z-40 px-4 mb-3">
+        <div class="max-w-md mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/80 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
+                <span id="pageHeaderTitle" class="text-xs font-bold text-cyan-400">Leads Directory</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center space-x-1">
+                    <i class="fa-solid fa-download text-[10px]"></i> <span>Export</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto p-4 pt-1">
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-[#10223b] p-3 rounded-2xl border border-slate-700/50 mb-4 shadow-lg">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="searchInput" onkeyup="filterLeads()" class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500" placeholder="Search by FLS, RM, or Client...">
+            </div>
+        </div>
+
+        <!-- Leads List Container -->
+        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 mb-6">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                <h3 id="tableTitle" class="text-xs font-bold text-slate-300 uppercase tracking-wider">All Leads Card View</h3>
+                <span id="leadCountBadge" class="text-[11px] text-cyan-400 font-semibold">0 Leads</span>
+            </div>
+            
+            <div id="leadsListContainer" class="space-y-3">
+                <p class="text-xs text-slate-400 text-center py-4">Loading leads from Google Sheet...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SEPARATE FLOATING "ADD LEAD" BUTTON -->
+    <div class="fixed bottom-20 right-4 z-50">
+        <button onclick="openAddModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-4 py-3 rounded-full shadow-2xl flex items-center space-x-2 border border-emerald-400/30 transform active:scale-95 transition">
+            <i class="fa-solid fa-plus text-base bg-white/20 p-1.5 rounded-full"></i>
+            <span class="text-xs tracking-wide pr-1">Add Lead</span>
+        </button>
+    </div>
+
+    <!-- Comprehensive Add/Edit Lead Modal -->
+    <div id="formModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#1e293b] w-full max-w-lg p-5 rounded-2xl border border-slate-700 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-700">
+                <h3 id="formModalTitle" class="font-bold text-sm text-cyan-400">Add New Lead (Sheet Sync)</h3>
+                <button onclick="toggleFormModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="leadForm" onsubmit="handleFormSubmit(event)" class="space-y-3">
+                <input type="hidden" id="editLeadId">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Date</label>
+                        <input type="date" id="fDate" required class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Location (Fixed)</label>
+                        <input type="text" id="fLocation" value="Mumbai-2" readonly class="w-full px-2.5 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-slate-300 cursor-not-allowed">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Customer Name</label>
+                        <input type="text" id="fCustomerName" required class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Client Name">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
+                        <input type="tel" id="fPhone" required class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="9876543210">
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Illustration</label>
+                        <select id="fIllustration" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">F2F</label>
+                        <select id="fF2F" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">CRM</label>
+                        <input type="text" id="fCRM" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Details">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">FLS</label>
+                        <input type="text" id="fFLS" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="FLS">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">RM Name</label>
+                        <input type="text" id="fRM" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="RM">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">UH Name (Fixed)</label>
+                        <input type="text" id="fUH" value="Amit Chodankar" readonly class="w-full px-2.5 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-slate-300 cursor-not-allowed">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Status / Category</label>
+                        <select id="fStatus" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="New Lead">New Lead</option>
+                            <option value="Follow up">Follow up</option>
+                            <option value="No Contact">No Contact</option>
+                            <option value="Closed">Closed</option>
+                            <option value="Not Interested">Not Interested</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Followup Date</label>
+                        <input type="date" id="fFollowupDate" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Expected Premium</label>
+                        <input type="text" id="fExpPremium" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="₹ Amount">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Closer Date</label>
+                        <input type="date" id="fCloserDate" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Premium Closed</label>
+                        <input type="text" id="fPremClosed" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="₹ Amount">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Date with Remark</label>
+                    <input type="text" id="fRemark" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Date & Remarks...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">CTC || AC Bal || CC Limit</label>
+                    <input type="text" id="fFinancials" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="e.g. 10LPA || 50K || 2L">
+                </div>
+                <div class="flex space-x-2 pt-2">
+                    <button type="button" onclick="toggleFormModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 rounded-lg text-xs transition">Cancel</button>
+                    <button type="submit" class="w-1/2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold py-2 rounded-lg text-xs transition">Save Lead</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#071321] border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40">
+        <a href="index.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="leads.html" class="text-cyan-400 flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-user-group text-base"></i>
+            <span class="text-[10px] font-medium">Leads</span>
+        </a>
+        <a href="summary.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1 relative">
+            <i class="fa-solid fa-list-check text-base"></i>
+            <span class="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-bold px-1 rounded-full" id="badgeCount">0</span>
+            <span class="text-[10px] font-medium">Summary</span>
+        </a>
+        <a href="calendar.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-calendar text-base"></i>
+            <span class="text-[10px] font-medium">Calendar</span>
+        </a>
+    </nav>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLukoukLASlaPsBj0ApZoXqTbzGcqfWCD1YSg5yLyE8B4R6QPCo2gPZixBG9m03uaxLw/exec";
+        let leads = [];
+        let urlParams = new URLSearchParams(window.location.search);
+        let statusFilter = urlParams.get('status') || 'All';
+
+        window.onload = function() {
+            if (statusFilter !== 'All') {
+                document.getElementById('pageHeaderTitle').innerText = `Leads: ${statusFilter}`;
+                document.getElementById('tableTitle').innerText = `Filtered View (${statusFilter})`;
+            }
+            fetchLeadsFromSheet();
+        };
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            try {
+                let d = new Date(dateString);
+                if (isNaN(d.getTime())) return dateString;
+                let day = String(d.getDate()).padStart(2, '0');
+                let month = String(d.getMonth() + 1).padStart(2, '0');
+                let year = d.getFullYear();
+                return `${day}-${month}-${year}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        async function fetchLeadsFromSheet() {
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                leads = data;
+                filterLeads();
+                updateBadge();
+            } catch (error) {
+                console.error("Error fetching from sheet:", error);
+                document.getElementById('leadsListContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Failed to load leads.</p>`;
+            }
+        }
+
+        function filterLeads() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = leads.filter(l => {
+                const matchesStatus = (statusFilter === 'All' || l.status === statusFilter);
+                const matchesSearch = (
+                    (l.fls && l.fls.toLowerCase().includes(query)) ||
+                    (l.rmName && l.rmName.toLowerCase().includes(query)) ||
+                    (l.customerName && l.customerName.toLowerCase().includes(query)) ||
+                    (l.phone && l.phone.toString().includes(query))
+                );
+                return matchesStatus && matchesSearch;
+            });
+            renderLeads(filtered);
+        }
+
+        function renderLeads(dataArray) {
+            const container = document.getElementById('leadsListContainer');
+            container.innerHTML = '';
+            document.getElementById('leadCountBadge').innerText = `${dataArray.length} Leads`;
+
+            if (dataArray.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No matching leads found.</p>`;
+                return;
+            }
+
+            dataArray.forEach(lead => {
+                let badgeColor = 'bg-slate-800 text-slate-300';
+                if(lead.status === 'New Lead') badgeColor = 'bg-indigo-950 text-indigo-300 border border-indigo-800';
+                if(lead.status === 'Follow up') badgeColor = 'bg-amber-950 text-amber-300 border border-amber-800';
+                if(lead.status === 'Closed') badgeColor = 'bg-sky-950 text-sky-300 border border-sky-800';
+                if(lead.status === 'Not Interested') badgeColor = 'bg-rose-950 text-rose-300 border border-rose-800';
+
+                const card = document.createElement('div');
+                card.className = "bg-[#182c4d] p-3 rounded-xl border border-slate-700 flex flex-col space-y-2 text-xs";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-sm text-white">${lead.customerName}</h4>
+                            <p class="text-slate-400 mt-0.5"><i class="fa-solid fa-phone text-[10px] mr-1"></i>${lead.phone} | <i class="fa-solid fa-location-dot ml-1"></i> ${lead.location || 'Mumbai-2'}</p>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${lead.status}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 bg-slate-900/60 p-2 rounded text-[11px] text-slate-300">
+                        <div><b>FLS:</b> <span class="text-cyan-400 font-semibold">${lead.fls || 'N/A'}</span></div>
+                        <div><b>Date:</b> ${formatDate(lead.date)}</div>
+                        <div><b>Illustration:</b> ${lead.illustration || 'No'} | <b>F2F:</b> ${lead.f2f || 'No'}</div>
+                        <div><b>Exp. Premium:</b> ₹${lead.expectedPremium || '0'}</div>
+                        <div><b>UH:</b> ${lead.uhName || 'Amit Chodankar'}</div>
+                        <div><b>RM:</b> ${lead.rmName || '-'}</div>
+                        <div class="col-span-2 text-cyan-300"><b>Financials:</b> ${lead.financials || 'N/A'}</div>
+                        <div class="col-span-2 italic text-slate-400"><b>Remark:</b> ${lead.dateWithRemark || 'No remarks'}</div>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-700/60">
+                        <div class="flex space-x-2">
+                            <a href="tel:${lead.phone}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-semibold flex items-center space-x-1">
+                                <i class="fa-solid fa-phone text-[10px]"></i> <span>Call</span>
+                            </a>
+                            <a href="https://wa.me/91${lead.phone}?text=Hello%20${encodeURIComponent(lead.customerName)},%20regarding%20your%20lead..." target="_blank" class="bg-green-600 hover:bg-green-500 text-white px-2.5 py-1 rounded-lg font-semibold flex items-center space-x-1">
+                                <i class="fa-brands fa-whatsapp"></i> <span>Msg</span>
+                            </a>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="editLead('${lead.id}')" class="text-slate-400 hover:text-cyan-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteLead('${lead.id}')" class="text-slate-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('leadForm').reset();
+            document.getElementById('editLeadId').value = '';
+            document.getElementById('fLocation').value = 'Mumbai-2';
+            document.getElementById('fUH').value = 'Amit Chodankar';
+            document.getElementById('formModalTitle').innerText = 'Add New Lead (Sheet Sync)';
+            toggleFormModal();
+        }
+
+        function toggleFormModal() {
+            document.getElementById('formModal').classList.toggle('hidden');
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const editId = document.getElementById('editLeadId').value;
+            
+            const leadData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                sNo: editId ? leads.find(l => l.id == editId).sNo : leads.length + 1,
+                date: document.getElementById('fDate').value,
+                location: "Mumbai-2",
+                customerName: document.getElementById('fCustomerName').value,
+                phone: document.getElementById('fPhone').value,
+                illustration: document.getElementById('fIllustration').value,
+                f2f: document.getElementById('fF2F').value,
+                crm: document.getElementById('fCRM').value,
+                fls: document.getElementById('fFLS').value,
+                rmName: document.getElementById('fRM').value,
+                supervisorName: "-",
+                uhName: "Amit Chodankar",
+                status: document.getElementById('fStatus').value,
+                followupDate: document.getElementById('fFollowupDate').value,
+                expectedPremium: document.getElementById('fExpPremium').value,
+                closerDate: document.getElementById('fCloserDate').value,
+                premiumClosed: document.getElementById('fPremClosed').value,
+                dateWithRemark: document.getElementById('fRemark').value,
+                financials: document.getElementById('fFinancials').value
+            };
+
+            toggleFormModal();
+            document.getElementById('leadsListContainer').innerHTML = `<p class="text-xs text-cyan-400 text-center py-4">Saving to Google Sheet...</p>`;
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "save", lead: leadData })
+                });
+                fetchLeadsFromSheet();
+            } catch (error) {
+                console.error("Error saving lead:", error);
+                alert("Error saving to Google Sheet!");
+            }
+        }
+
+        function editLead(id) {
+            const lead = leads.find(l => l.id == id);
+            if (!lead) return;
+
+            document.getElementById('editLeadId').value = lead.id;
+            document.getElementById('fDate').value = lead.date ? lead.date.split('T')[0] : '';
+            document.getElementById('fLocation').value = "Mumbai-2";
+            document.getElementById('fCustomerName').value = lead.customerName || '';
+            document.getElementById('fPhone').value = lead.phone || '';
+            document.getElementById('fIllustration').value = lead.illustration || 'No';
+            document.getElementById('fF2F').value = lead.f2f || 'No';
+            document.getElementById('fCRM').value = lead.crm || '';
+            document.getElementById('fFLS').value = lead.fls || '';
+            document.getElementById('fRM').value = lead.rmName || '';
+            document.getElementById('fUH').value = "Amit Chodankar";
+            document.getElementById('fStatus').value = lead.status || 'New Lead';
+            document.getElementById('fFollowupDate').value = lead.followupDate ? lead.followupDate.split('T')[0] : '';
+            document.getElementById('fExpPremium').value = lead.expectedPremium || '';
+            document.getElementById('fCloserDate').value = lead.closerDate ? lead.closerDate.split('T')[0] : '';
+            document.getElementById('fPremClosed').value = lead.premiumClosed || '';
+            document.getElementById('fRemark').value = lead.dateWithRemark || '';
+            document.getElementById('fFinancials').value = lead.financials || '';
+
+            document.getElementById('formModalTitle').innerText = 'Edit Lead Details';
+            toggleFormModal();
+        }
+
+        async function deleteLead(id) {
+            if (confirm('Delete this lead from Google Sheet?')) {
+                document.getElementById('leadsListContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Deleting from Google Sheet...</p>`;
+                try {
+                    await fetch(WEB_APP_URL, {
+                        method: "POST",
+                        body: JSON.stringify({ action: "delete", id: id })
+                    });
+                    fetchLeadsFromSheet();
+                } catch (error) {
+                    console.error("Error deleting lead:", error);
+                    alert("Error deleting from Google Sheet!");
+                }
+            }
+        }
+
+        function updateBadge() {
+            const followupCount = leads.filter(l => l.status === 'Follow up').length;
+            document.getElementById('badgeCount').innerText = followupCount;
+        }
+
+        function exportToCSV() {
+            if (leads.length === 0) { alert('No data to export.'); return; }
+            let csv = "S No,Date,Location,Customer Name,Phone,Illustration,F2F,CRM,FLS,RM Name,Supervisor Name,UH Name,Status,Followup Date,Expected Premium,Closer Date,Premium Closed,Date with Remark,CTC || AC Bal || CC Limit\n";
+            leads.forEach(l => {
+                csv += `"${l.sNo}","${l.date || ''}","${l.location || 'Mumbai-2'}","${l.customerName}","${l.phone}","${l.illustration || ''}","${l.f2f || ''}","${l.crm || ''}","${l.fls || ''}","${l.rmName || ''}","${l.supervisorName || ''}","${l.uhName || 'Amit Chodankar'}","${l.status}","${l.followupDate || ''}","${l.expectedPremium || ''}","${l.closerDate || ''}","${l.premiumClosed || ''}","${l.dateWithRemark || ''}","${l.financials || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "leads_sheet_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

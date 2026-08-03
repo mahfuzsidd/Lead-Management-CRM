@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadPulse - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b192c] text-white min-h-screen pb-28">
+
+    <!-- FLOATING TOP HEADER BAR -->
+    <div class="sticky top-3 z-40 px-4 mb-3">
+        <div class="max-w-md mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/80 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <button class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-bars"></i></button>
+                <div class="flex items-center space-x-2 bg-[#1e293b] px-3.5 py-1.5 rounded-full border border-slate-700">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[11px] font-extrabold text-cyan-400 tracking-wide">LMC By Mahfuz</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center space-x-1">
+                    <i class="fa-solid fa-download text-[10px]"></i> <span>Export</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto p-4 pt-1">
+        <!-- Database text completely removed here -->
+
+        <!-- Circular Performance Gauge -->
+        <div class="bg-[#10223b] rounded-3xl p-5 mb-6 text-center relative border border-slate-700/50 shadow-xl mt-2">
+            <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-slate-800" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path id="gaugePath" class="text-cyan-400 transition-all duration-1000" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="conversionPercentText" class="text-3xl font-extrabold text-white">0%</span>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">Conversion Performance</p>
+        </div>
+
+        <!-- 4 Interactive Status Cards -->
+        <div class="space-y-3 mb-6">
+            <div onclick="goToLeads('New Lead')" class="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] p-4 rounded-2xl shadow-lg cursor-pointer transform active:scale-95 transition flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-bold text-white tracking-wide">New Lead</h3>
+                    <p id="countNewLead" class="text-3xl font-black text-white mt-1">0</p>
+                </div>
+                <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-2xl text-white/80"><i class="fa-solid fa-user-plus"></i></div>
+            </div>
+
+            <div onclick="goToLeads('Follow up')" class="bg-gradient-to-r from-[#f59e0b] to-[#d97706] p-4 rounded-2xl shadow-lg cursor-pointer transform active:scale-95 transition flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-bold text-white tracking-wide">Follow up</h3>
+                    <p id="countFollowup" class="text-3xl font-black text-white mt-1">0</p>
+                </div>
+                <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-2xl text-white/80"><i class="fa-solid fa-calendar-days"></i></div>
+            </div>
+
+            <div onclick="goToLeads('Closed')" class="bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] p-4 rounded-2xl shadow-lg cursor-pointer transform active:scale-95 transition flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-bold text-white tracking-wide">Closed</h3>
+                    <p id="countClosed" class="text-3xl font-black text-white mt-1">0</p>
+                </div>
+                <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-2xl text-white/80"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+
+            <div onclick="goToLeads('Not Interested')" class="bg-gradient-to-r from-[#f43f5e] to-[#e11d48] p-4 rounded-2xl shadow-lg cursor-pointer transform active:scale-95 transition flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-bold text-white tracking-wide">Not Interested</h3>
+                    <p id="countNotInterested" class="text-3xl font-black text-white mt-1">0</p>
+                </div>
+                <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-2xl text-white/80"><i class="fa-solid fa-ban"></i></div>
+            </div>
+        </div>
+
+        <!-- Recent Leads Preview Section (Max 5) -->
+        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 mb-6">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Recent Leads (Showing max 5)</h3>
+                <a href="leads.html" class="text-[11px] text-cyan-400 font-bold hover:underline">View More <i class="fa-solid fa-arrow-right text-[9px]"></i></a>
+            </div>
+            
+            <div id="leadsListContainer" class="space-y-3">
+                <p class="text-xs text-slate-400 text-center py-4">Loading leads...</p>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+                <a href="leads.html" class="inline-block w-full bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold py-2.5 rounded-xl text-xs transition border border-slate-700">
+                    <i class="fa-solid fa-user-group mr-1.5"></i> View All Leads in Directory
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEPARATE FLOATING "ADD LEAD" BUTTON -->
+    <div class="fixed bottom-20 right-4 z-50">
+        <button onclick="openAddModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-4 py-3 rounded-full shadow-2xl flex items-center space-x-2 border border-emerald-400/30 transform active:scale-95 transition">
+            <i class="fa-solid fa-plus text-base bg-white/20 p-1.5 rounded-full"></i>
+            <span class="text-xs tracking-wide pr-1">Add Lead</span>
+        </button>
+    </div>
+
+    <!-- Comprehensive Add/Edit Lead Modal -->
+    <div id="formModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-[#1e293b] w-full max-w-lg p-5 rounded-2xl border border-slate-700 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-700">
+                <h3 id="formModalTitle" class="font-bold text-sm text-cyan-400">Add New Lead</h3>
+                <button onclick="toggleFormModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="leadForm" onsubmit="handleFormSubmit(event)" class="space-y-3">
+                <input type="hidden" id="editLeadId">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Date</label>
+                        <input type="date" id="fDate" required class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Location (Fixed)</label>
+                        <input type="text" id="fLocation" value="Mumbai-2" readonly class="w-full px-2.5 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-slate-300 cursor-not-allowed">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Customer Name</label>
+                        <input type="text" id="fCustomerName" required class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Client Name">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone Number (Max 10)</label>
+                        <!-- Restricted strictly to 10 digits max -->
+                        <input type="tel" id="fPhone" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="">
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Illustration</label>
+                        <select id="fIllustration" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">F2F</label>
+                        <select id="fF2F" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">CRM</label>
+                        <input type="text" id="fCRM" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Details">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">FLS</label>
+                        <select id="fFLS" class="w-full px-1 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="Mahfuz">Mahfuz</option>
+                            <option value="Kishan">Kishan</option>
+                            <option value="Neha">Neha</option>
+                            <option value="Rehan">Rehan</option>
+                            <option value="Jitesh">Jitesh</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">RM Name</label>
+                        <input type="text" id="fRM" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="RM">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Supervisor</label>
+                        <select id="fSupervisor" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="Rahul">Rahul</option>
+                            <option value="Aarti">Aarti</option>
+                            <option value="Kunda">Kunda</option>
+                            <option value="TBA">TBA</option>
+                            <option value="TBA-2">TBA-2</option>
+                            <option value="Minakshi">Minakshi</option>
+                            <option value="Ritesh">Ritesh</option>
+                            <option value="Vikash">Vikash</option>
+                            <option value="Pritee">Pritee</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">UH Name</label>
+                        <input type="text" id="fUH" value="Amit Chodankar" readonly class="w-full px-2.5 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-slate-300 cursor-not-allowed">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Status / Category</label>
+                        <select id="fStatus" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                            <option value="New Lead">New Lead</option>
+                            <option value="Follow up">Follow up</option>
+                            <option value="No Contact">No Contact</option>
+                            <option value="Closed">Closed</option>
+                            <option value="Not Interested">Not Interested</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Followup Date</label>
+                        <input type="date" id="fFollowupDate" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Expected Premium</label>
+                        <input type="text" id="fExpPremium" onblur="formatInputCurrency(this)" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="1,00,000">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Closer Date</label>
+                        <input type="date" id="fCloserDate" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Premium Closed</label>
+                        <input type="text" id="fPremClosed" onblur="formatInputCurrency(this)" class="w-full px-2 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="1,00,000">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Date with Remark</label>
+                    <input type="text" id="fRemark" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Date & Remarks...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">CTC || AC Bal || CC Limit</label>
+                    <input type="text" id="fFinancials" class="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="e.g. 10LPA || 50K || 2L">
+                </div>
+                <div class="flex space-x-2 pt-2">
+                    <button type="button" onclick="toggleFormModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 rounded-lg text-xs transition">Cancel</button>
+                    <button type="submit" class="w-1/2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold py-2 rounded-lg text-xs transition">Save Lead</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#071321] border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40">
+        <a href="index.html" class="text-cyan-400 flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="leads.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-user-group text-base"></i>
+            <span class="text-[10px] font-medium">Leads</span>
+        </a>
+        <a href="summary.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1 relative">
+            <i class="fa-solid fa-list-check text-base"></i>
+            <span class="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-bold px-1 rounded-full" id="badgeCount">0</span>
+            <span class="text-[10px] font-medium">Summary</span>
+        </a>
+        <a href="calendar.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+            <i class="fa-solid fa-calendar text-base"></i>
+            <span class="text-[10px] font-medium">Calendar</span>
+        </a>
+    </nav>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLukoukLASlaPsBj0ApZoXqTbzGcqfWCD1YSg5yLyE8B4R6QPCo2gPZixBG9m03uaxLw/exec";
+        let leads = [];
+
+        window.onload = function() {
+            fetchLeadsFromSheet();
+        };
+
+        // Indian Currency Format Helper (e.g. 100000 -> 1,00,000)
+        function formatIndianCurrency(numStr) {
+            if (!numStr) return '';
+            let cleanNum = numStr.toString().replace(/[^0-9]/g, '');
+            if (cleanNum === '') return '';
+            let x = cleanNum;
+            let lastThree = x.substring(x.length - 3);
+            let otherNumbers = x.substring(0, x.length - 3);
+            if (otherNumbers != '') {
+                lastThree = ',' + lastThree;
+            }
+            let res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+            return res;
+        }
+
+        function formatInputCurrency(input) {
+            if (input.value) {
+                input.value = formatIndianCurrency(input.value);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            try {
+                let d = new Date(dateString);
+                if (isNaN(d.getTime())) return dateString;
+                let day = String(d.getDate()).padStart(2, '0');
+                let month = String(d.getMonth() + 1).padStart(2, '0');
+                let year = d.getFullYear();
+                return `${day}-${month}-${year}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        async function fetchLeadsFromSheet() {
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                leads = data;
+                renderRecentLeads();
+                updateStats();
+            } catch (error) {
+                console.error("Error fetching from sheet:", error);
+                document.getElementById('leadsListContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Failed to load leads.</p>`;
+            }
+        }
+
+        function goToLeads(status) {
+            window.location.href = `leads.html?status=${encodeURIComponent(status)}`;
+        }
+
+        function openAddModal() {
+            document.getElementById('leadForm').reset();
+            document.getElementById('editLeadId').value = '';
+            document.getElementById('fLocation').value = 'Mumbai-2';
+            document.getElementById('fUH').value = 'Amit Chodankar';
+            document.getElementById('formModalTitle').innerText = 'Add New Lead';
+            toggleFormModal();
+        }
+
+        function toggleFormModal() {
+            document.getElementById('formModal').classList.toggle('hidden');
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const editId = document.getElementById('editLeadId').value;
+            
+            const leadData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                sNo: editId ? leads.find(l => l.id == editId).sNo : leads.length + 1,
+                date: document.getElementById('fDate').value,
+                location: "Mumbai-2",
+                customerName: document.getElementById('fCustomerName').value,
+                phone: document.getElementById('fPhone').value,
+                illustration: document.getElementById('fIllustration').value,
+                f2f: document.getElementById('fF2F').value,
+                crm: document.getElementById('fCRM').value,
+                fls: document.getElementById('fFLS').value,
+                rmName: document.getElementById('fRM').value,
+                supervisorName: document.getElementById('fSupervisor').value,
+                uhName: "Amit Chodankar",
+                status: document.getElementById('fStatus').value,
+                followupDate: document.getElementById('fFollowupDate').value,
+                expectedPremium: formatIndianCurrency(document.getElementById('fExpPremium').value),
+                closerDate: document.getElementById('fCloserDate').value,
+                premiumClosed: formatIndianCurrency(document.getElementById('fPremClosed').value),
+                dateWithRemark: document.getElementById('fRemark').value,
+                financials: document.getElementById('fFinancials').value
+            };
+
+            toggleFormModal();
+            document.getElementById('leadsListContainer').innerHTML = `<p class="text-xs text-cyan-400 text-center py-4">Saving entry...</p>`;
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "save", lead: leadData })
+                });
+                fetchLeadsFromSheet();
+            } catch (error) {
+                console.error("Error saving lead:", error);
+                alert("Error saving data!");
+            }
+        }
+
+        function renderRecentLeads() {
+            const container = document.getElementById('leadsListContainer');
+            container.innerHTML = '';
+            let limitedLeads = leads.slice(0, 5);
+
+            if (limitedLeads.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No leads found.</p>`;
+                return;
+            }
+
+            limitedLeads.forEach(lead => {
+                let badgeColor = 'bg-slate-800 text-slate-300';
+                if(lead.status === 'New Lead') badgeColor = 'bg-indigo-950 text-indigo-300 border border-indigo-800';
+                if(lead.status === 'Follow up') badgeColor = 'bg-amber-950 text-amber-300 border border-amber-800';
+                if(lead.status === 'Closed') badgeColor = 'bg-sky-950 text-sky-300 border border-sky-800';
+                if(lead.status === 'Not Interested') badgeColor = 'bg-rose-950 text-rose-300 border border-rose-800';
+
+                let formattedExpPrem = lead.expectedPremium ? formatIndianCurrency(lead.expectedPremium) : '0';
+
+                const card = document.createElement('div');
+                card.className = "bg-[#182c4d] p-3 rounded-xl border border-slate-700 flex flex-col space-y-2 text-xs";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-sm text-white">${lead.customerName}</h4>
+                            <p class="text-slate-400 mt-0.5"><i class="fa-solid fa-phone text-[10px] mr-1 text-emerald-400"></i><span class="text-white font-medium">${lead.phone}</span> | <i class="fa-solid fa-location-dot ml-1"></i> ${lead.location || 'Mumbai-2'}</p>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${lead.status}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 bg-slate-900/60 p-2 rounded text-[11px] text-slate-300">
+                        <div><b>FLS:</b> <span class="text-cyan-400 font-semibold">${lead.fls || 'N/A'}</span></div>
+                        <div><b>Date:</b> ${formatDate(lead.date)}</div>
+                        <div><b>Exp. Premium:</b> ₹${formattedExpPrem}</div>
+                        <div><b>RM:</b> ${lead.rmName || '-'}</div>
+                        <div class="col-span-2 text-cyan-300"><b>Financials:</b> ${lead.financials || 'N/A'}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateStats() {
+            const total = leads.length;
+            const newLeadCount = leads.filter(l => l.status === 'New Lead').length;
+            const followupCount = leads.filter(l => l.status === 'Follow up').length;
+            const closedCount = leads.filter(l => l.status === 'Closed').length;
+            const notInterestedCount = leads.filter(l => l.status === 'Not Interested').length;
+
+            document.getElementById('countNewLead').innerText = newLeadCount;
+            document.getElementById('countFollowup').innerText = followupCount;
+            document.getElementById('countClosed').innerText = closedCount;
+            document.getElementById('countNotInterested').innerText = notInterestedCount;
+            document.getElementById('badgeCount').innerText = followupCount;
+
+            const conversionRate = total > 0 ? Math.round((closedCount / total) * 100) : 0;
+            document.getElementById('conversionPercentText').innerText = conversionRate + '%';
+            document.getElementById('gaugePath').setAttribute('stroke-dasharray', `${conversionRate}, 100`);
+        }
+
+        function exportToCSV() {
+            if (leads.length === 0) { alert('No data to export.'); return; }
+            let csv = "S No,Date,Location,Customer Name,Phone,Illustration,F2F,CRM,FLS,RM Name,Supervisor Name,UH Name,Status,Followup Date,Expected Premium,Closer Date,Premium Closed,Date with Remark,CTC || AC Bal || CC Limit\n";
+            leads.forEach(l => {
+                csv += `"${l.sNo}","${l.date || ''}","${l.location || 'Mumbai-2'}","${l.customerName}","${l.phone}","${l.illustration || ''}","${l.f2f || ''}","${l.crm || ''}","${l.fls || ''}","${l.rmName || ''}","${l.supervisorName || ''}","${l.uhName || 'Amit Chodankar'}","${l.status}","${l.followupDate || ''}","${l.expectedPremium || ''}","${l.closerDate || ''}","${l.premiumClosed || ''}","${l.dateWithRemark || ''}","${l.financials || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "home_leads_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
