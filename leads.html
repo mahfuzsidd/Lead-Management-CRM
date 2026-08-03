@@ -551,8 +551,11 @@
         }
 
         function editLead(rowIndex) {
-            const lead = leads.find(l => l.rowIndex == rowIndex);
-            if (!lead) return;
+            const lead = leads.find(l => String(l.rowIndex) === String(rowIndex));
+            if (!lead) {
+                alert("Lead record not found for editing.");
+                return;
+            }
 
             document.getElementById('editRowIndex').value = lead.rowIndex;
             document.getElementById('fSrNo').value = lead.sNo || '';
@@ -626,3 +629,4 @@
     </script>
 </body>
 </html>
+
