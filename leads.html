@@ -71,6 +71,7 @@
             </div>
             <form id="leadForm" onsubmit="handleFormSubmit(event)" class="space-y-3">
                 <input type="hidden" id="editLeadId">
+                <input type="hidden" id="editRowIndex">
                 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -292,7 +293,7 @@
     </nav>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxot3Icntv6plIlm1q-V62facX6LT6EuTXKBiVvrXXfN_gi33wZZMByeMQuV8FMfyVqvQ/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwPGAJpI0NIICiXTxk73RCFpwGm7nzT3HZSS2x_3Xmi78WM2Qvbml63p0ex_SehConnEg/exec";
         let leads = [];
         let urlParams = new URLSearchParams(window.location.search);
         let statusFilter = urlParams.get('status') || 'All';
@@ -345,6 +346,7 @@
                 
                 leads = data.map((item, index) => ({
                     id: item.id || (index + 1),
+                    rowIndex: item.rowIndex || (index + 2),
                     sNo: item["Sr No"] || item.sNo || (index + 1),
                     ctDate: item["CT Date"] || item.ctDate || "",
                     unit: item["Unit"] || item.unit || "Mumbai-2",
@@ -375,7 +377,6 @@
                     uhName: item["UH Name"] || item.uhName || "Amit Chodankar"
                 }));
 
-                // Sort leads by CT Date in descending order (Latest Date first)
                 leads.sort((a, b) => {
                     let dateA = a.ctDate ? new Date(a.ctDate).getTime() : 0;
                     let dateB = b.ctDate ? new Date(b.ctDate).getTime() : 0;
@@ -429,7 +430,6 @@
                 let phoneNum = lead.custId ? String(lead.custId).trim() : '';
                 let custName = lead.customerName ? lead.customerName.trim() : 'Valued';
 
-                // Custom HDFC Wealth Management Greeting Message
                 let whatsappMsg = `Hi ${custName} sir,\n\nGreetings from HDFC Bank!\n\nI’m associated with the Wealth Management team. Happy to connect and assist you with your financial & investment needs.`;
 
                 const card = document.createElement('div');
@@ -463,8 +463,8 @@
                             </a>` : `<span class="text-[10px] text-slate-400 italic">No number available</span>`}
                         </div>
                         <div class="flex space-x-1">
-                            <button onclick="editLead('${lead.id}')" class="text-slate-400 hover:text-cyan-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteLead('${lead.id}')" class="text-slate-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editLead('${lead.rowIndex}')" class="text-slate-400 hover:text-cyan-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteLead('${lead.rowIndex}')" class="text-slate-400 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -475,6 +475,7 @@
         function openAddModal() {
             document.getElementById('leadForm').reset();
             document.getElementById('editLeadId').value = '';
+            document.getElementById('editRowIndex').value = '';
             document.getElementById('fSrNo').value = leads.length + 1;
             
             const today = new Date();
@@ -500,10 +501,10 @@
 
         async function handleFormSubmit(event) {
             event.preventDefault();
-            const editId = document.getElementById('editLeadId').value;
+            const editRow = document.getElementById('editRowIndex').value;
             
             const leadData = {
-                id: editId ? editId : Date.now(),
+                rowIndex: editRow ? parseInt(editRow) : "",
                 sNo: document.getElementById('fSrNo').value || (leads.length + 1),
                 ctDate: document.getElementById('fCtDate').value,
                 unit: document.getElementById('fUnit').value,
@@ -549,11 +550,11 @@
             }
         }
 
-        function editLead(id) {
-            const lead = leads.find(l => l.id == id || l.sNo == id);
+        function editLead(rowIndex) {
+            const lead = leads.find(l => l.rowIndex == rowIndex);
             if (!lead) return;
 
-            document.getElementById('editLeadId').value = lead.id;
+            document.getElementById('editRowIndex').value = lead.rowIndex;
             document.getElementById('fSrNo').value = lead.sNo || '';
             document.getElementById('fCtDate').value = lead.ctDate ? lead.ctDate.split('T')[0] : '';
             document.getElementById('fUnit').value = lead.unit || 'Mumbai-2';
@@ -587,13 +588,13 @@
             toggleFormModal();
         }
 
-        async function deleteLead(id) {
+        async function deleteLead(rowIndex) {
             if (confirm('Delete this lead from Google Sheet?')) {
                 document.getElementById('leadsListContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Deleting from Google Sheet...</p>`;
                 try {
                     await fetch(WEB_APP_URL, {
                         method: "POST",
-                        body: JSON.stringify({ action: "delete", id: id })
+                        body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
                     });
                     fetchLeadsFromSheet();
                 } catch (error) {
