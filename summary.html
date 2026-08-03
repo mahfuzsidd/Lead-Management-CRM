@@ -18,7 +18,7 @@
         <div class="max-w-4xl mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/85 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <a href="index.html" class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
-                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">FLS Performance Summary</span>
+                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">FLS Performance Summary (28 Columns)</span>
             </div>
             <div class="flex items-center space-x-2">
                 <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center space-x-1">
@@ -30,9 +30,14 @@
 
     <div class="max-w-4xl mx-auto p-4 pt-1">
 
+        <!-- Overall Total Performance Summary Card (Top Priority) -->
+        <div id="overallSummaryContainer" class="mb-6">
+            <!-- Dynamically injected overall performance card -->
+        </div>
+
         <!-- FLS Summary Cards Section -->
         <div class="mb-6">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">FLS-Wise Performance & Status Counts</h3>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">FLS-Wise Performance & Status Counts (Sorted by CT Count)</h3>
             <div id="flsSummaryContainer" class="space-y-4">
                 <p class="text-xs text-slate-400 text-center py-4">Loading FLS summary from Google Sheet...</p>
             </div>
@@ -41,10 +46,10 @@
         <!-- Horizontal Border Separator -->
         <div class="border-t border-slate-700 my-6"></div>
 
-        <!-- Excel-Like Complete Sheet Table View -->
+        <!-- Excel-Like Complete Sheet Table View (28 Columns) -->
         <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 shadow-xl">
             <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
-                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Complete Sheet Data (Excel View)</h3>
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Complete Sheet Data (28 Columns View)</h3>
                 <span id="totalSheetEntries" class="text-[11px] text-cyan-400 font-semibold">0 Entries</span>
             </div>
             
@@ -52,30 +57,39 @@
                 <table class="w-full text-left text-[11px] text-slate-300 whitespace-nowrap">
                     <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-700">
                         <tr>
-                            <th class="p-2">S No</th>
-                            <th class="p-2">Date</th>
-                            <th class="p-2">Location</th>
+                            <th class="p-2">Sr No</th>
+                            <th class="p-2">CT Date</th>
+                            <th class="p-2">Unit</th>
+                            <th class="p-2">Customer Type</th>
+                            <th class="p-2">Cust ID</th>
                             <th class="p-2">Customer Name</th>
-                            <th class="p-2">Phone</th>
-                            <th class="p-2">Illustration</th>
-                            <th class="p-2">F2F</th>
-                            <th class="p-2">CRM</th>
-                            <th class="p-2">FLS</th>
-                            <th class="p-2">RM Name</th>
-                            <th class="p-2">Supervisor</th>
-                            <th class="p-2">UH Name</th>
-                            <th class="p-2">Status</th>
+                            <th class="p-2">Call/Meeting Type</th>
+                            <th class="p-2">Profiled RM Y/N</th>
+                            <th class="p-2">Illustration sent</th>
+                            <th class="p-2">F2F Done</th>
+                            <th class="p-2">CRM Y/N</th>
+                            <th class="p-2">CRM Reason</th>
+                            <th class="p-2">Income Slab</th>
+                            <th class="p-2">A/C Bal / CC / FD</th>
+                            <th class="p-2">Premium Pitched</th>
+                            <th class="p-2">Expected Premium</th>
+                            <th class="p-2">Plan Pitched</th>
+                            <th class="p-2">CT/Lead Status</th>
+                            <th class="p-2">NI/NC VRBH/UH Informed</th>
                             <th class="p-2">Followup Date</th>
-                            <th class="p-2">Exp. Premium</th>
-                            <th class="p-2">Closer Date</th>
-                            <th class="p-2">Premium Closed</th>
-                            <th class="p-2">Remark</th>
-                            <th class="p-2">Financials (CTC/Bal/Limit)</th>
+                            <th class="p-2">FLS - Insurer</th>
+                            <th class="p-2">CSM- Insurer</th>
+                            <th class="p-2">FLS Remark & Date</th>
+                            <th class="p-2">L1 Spoken (CSM)</th>
+                            <th class="p-2">L1 Lead Remarks</th>
+                            <th class="p-2">RM Name</th>
+                            <th class="p-2">VRBH</th>
+                            <th class="p-2">UH Name</th>
                         </tr>
                     </thead>
                     <tbody id="sheetTableBody" class="divide-y divide-slate-800">
                         <tr>
-                            <td colspan="19" class="text-center py-4 text-slate-400">Loading sheet rows...</td>
+                            <td colspan="28" class="text-center py-4 text-slate-400">Loading sheet rows...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -107,7 +121,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLukoukLASlaPsBj0ApZoXqTbzGcqfWCD1YSg5yLyE8B4R6QPCo2gPZixBG9m03uaxLw/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxot3Icntv6plIlm1q-V62facX6LT6EuTXKBiVvrXXfN_gi33wZZMByeMQuV8FMfyVqvQ/exec";
         let leads = [];
 
         window.onload = function() {
@@ -132,22 +146,129 @@
             try {
                 let response = await fetch(WEB_APP_URL);
                 let data = await response.json();
-                leads = data;
+                
+                leads = data.map((item, index) => ({
+                    id: item.id || (index + 1),
+                    sNo: item["Sr No"] || item.sNo || (index + 1),
+                    ctDate: item["CT Date"] || item.ctDate || "",
+                    unit: item["Unit"] || item.unit || "Mumbai-2",
+                    customerType: item["Customer Type"] || item.customerType || "Prime",
+                    custId: item["Cust ID (If UH Allows)"] || item.custId || "",
+                    customerName: item["Customer Name"] || item.customerName || "",
+                    callMeetingType: item["Call/Meeting Type"] || item.callMeetingType || "Dialer/Call",
+                    profiledRm: item["Profiled & CT Trasnfer by RM Y/N"] || item.profiledRm || "Y",
+                    illustration: item["Illustration sent"] || item.illustration || "Y",
+                    f2f: item["F2F Done"] || item.f2f || "Y",
+                    crmYn: item["CRM Y/N"] || item.crmYn || "Y",
+                    crmReason: item["CRM If N - Reason"] || item.crmReason || "",
+                    incomeSlab: item["Income Slab"] || item.incomeSlab || "",
+                    acBal: item["Customer A/C Bal / CC LIM / FD"] || item.acBal || "",
+                    premPitched: item["Premium Pitched"] || item.premPitched || "",
+                    expectedPremium: item["Expected Premium"] || item.expectedPremium || "",
+                    planPitched: item["Plan Pitched"] || item.planPitched || "",
+                    status: item["CT/Lead Status"] || item.status || "New Lead",
+                    vrbhInformed: item["IF NI/NC Lead Is VRBH/UH Informed"] || item.vrbhInformed || "Y",
+                    followupDate: item["Followup Date"] || item.followupDate || "",
+                    fls: item["FLS - Insurer"] || item.fls || "Mahfuz",
+                    csmInsurer: item["CSM- Insurer"] || item.csmInsurer || "ABSLI",
+                    remark: item["FLS Detailed Lead Remark & Date"] || item.remark || "",
+                    l1Spoken: item["L1 Insurer CSM/TM Spoken to Customer (CSM)"] || item.l1Spoken || "",
+                    l1Remarks: item["LI 1 Insurer CSM/ TM Lead Remaks"] || item["LI 1 Insurer CSM/ TM Lead Remarks"] || item.l1Remarks || "",
+                    rmName: item["RM Name"] || item.rmName || "",
+                    vrbh: item["VRBH"] || item.vrbh || "Rahul",
+                    uhName: item["UH Name"] || item.uhName || "Amit Chodankar"
+                }));
+
+                renderOverallSummary();
                 renderFlsSummary();
                 renderExcelTable();
                 updateBadge();
             } catch (error) {
                 console.error("Error fetching sheet data:", error);
+                document.getElementById('overallSummaryContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-2">Failed to load overall summary.</p>`;
                 document.getElementById('flsSummaryContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Failed to load FLS data.</p>`;
-                document.getElementById('sheetTableBody').innerHTML = `<tr><td colspan="19" class="text-center py-4 text-rose-400">Failed to load table rows.</td></tr>`;
+                document.getElementById('sheetTableBody').innerHTML = `<tr><td colspan="28" class="text-center py-4 text-rose-400">Failed to load table rows.</td></tr>`;
             }
+        }
+
+        function renderOverallSummary() {
+            const container = document.getElementById('overallSummaryContainer');
+            
+            let total = leads.length;
+            let newLead = 0;
+            let followup = 0;
+            let noContact = 0;
+            let closed = 0;
+            let notInterested = 0;
+            let totalClosedPrem = 0;
+
+            leads.forEach(l => {
+                let st = (l.status || '').toLowerCase();
+                if (st.includes('new')) newLead++;
+                else if (st.includes('follow')) followup++;
+                else if (st.includes('no contact')) noContact++;
+                else if (st.includes('close')) {
+                    closed++;
+                    let premNum = parseFloat((l.expectedPremium || '').toString().replace(/[^0-9.]/g, '')) || 0;
+                    totalClosedPrem += premNum;
+                }
+                else if (st.includes('not') || st.includes('reject')) notInterested++;
+            });
+
+            container.innerHTML = `
+                <div class="mb-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Overall Unit Performance Summary</h3>
+                </div>
+                <div class="bg-gradient-to-r from-[#10223b] to-[#183156] p-4 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col space-y-3">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-700/80">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-cyan-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-lg">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-extrabold text-white tracking-wide">Total Unit Overview</h4>
+                                <p class="text-[10px] text-cyan-300 font-medium">Aggregated metrics across all FLS</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-slate-900/90 border border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 shadow">
+                                <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Closed: ₹${totalClosedPrem.toLocaleString('en-IN')}
+                            </span>
+                            <span class="bg-cyan-500 text-slate-950 text-xs font-extrabold px-3 py-1.5 rounded-xl shadow">
+                                Total CT: ${total}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">New Lead</span>
+                            <span class="text-base font-black text-indigo-400">${newLead}</span>
+                        </div>
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Follow up</span>
+                            <span class="text-base font-black text-amber-400">${followup}</span>
+                        </div>
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">No Contact</span>
+                            <span class="text-base font-black text-purple-400">${noContact}</span>
+                        </div>
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Closed</span>
+                            <span class="text-base font-black text-sky-400">${closed}</span>
+                        </div>
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Not Int.</span>
+                            <span class="text-base font-black text-rose-400">${notInterested}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderFlsSummary() {
             const container = document.getElementById('flsSummaryContainer');
             container.innerHTML = '';
 
-            // Group leads by FLS name
             let flsGroups = {};
             leads.forEach(l => {
                 let flsName = l.fls && l.fls.trim() !== "" ? l.fls.trim() : "Unassigned FLS";
@@ -156,31 +277,37 @@
                         total: 0,
                         newLead: 0,
                         followup: 0,
+                        noContact: 0,
                         closed: 0,
                         notInterested: 0,
-                        noContact: 0,
-                        premiumClosed: 0
+                        totalClosedPrem: 0
                     };
                 }
                 flsGroups[flsName].total++;
-                if (l.status === 'New Lead') flsGroups[flsName].newLead++;
-                if (l.status === 'Follow up') flsGroups[flsName].followup++;
-                if (l.status === 'Closed') {
+                
+                let st = (l.status || '').toLowerCase();
+                if (st.includes('new')) flsGroups[flsName].newLead++;
+                else if (st.includes('follow')) flsGroups[flsName].followup++;
+                else if (st.includes('no contact')) flsGroups[flsName].noContact++;
+                else if (st.includes('close')) {
                     flsGroups[flsName].closed++;
-                    let prem = parseFloat(l.premiumClosed) || 0;
-                    flsGroups[flsName].premiumClosed += prem;
+                    let premNum = parseFloat((l.expectedPremium || '').toString().replace(/[^0-9.]/g, '')) || 0;
+                    flsGroups[flsName].totalClosedPrem += premNum;
                 }
-                if (l.status === 'Not Interested') flsGroups[flsName].notInterested++;
-                if (l.status === 'No Contact') flsGroups[flsName].noContact++;
+                else if (st.includes('not') || st.includes('reject')) flsGroups[flsName].notInterested++;
             });
 
-            let flsKeys = Object.keys(flsGroups);
-            if (flsKeys.length === 0) {
+            // Convert to array and sort descending by total CT count (jiski CT jyada hogi wo top par aayega)
+            let sortedFlsKeys = Object.keys(flsGroups).sort((a, b) => {
+                return flsGroups[b].total - flsGroups[a].total;
+            });
+
+            if (sortedFlsKeys.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No FLS data available.</p>`;
                 return;
             }
 
-            flsKeys.forEach(fls => {
+            sortedFlsKeys.forEach(fls => {
                 let data = flsGroups[fls];
                 let card = document.createElement('div');
                 card.className = "bg-[#10223b] p-4 rounded-2xl border border-slate-700/60 shadow-lg flex flex-col space-y-3";
@@ -194,28 +321,32 @@
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="bg-slate-900 border border-slate-700 px-3 py-1 rounded-xl text-xs font-bold text-emerald-400 shadow">
-                                <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Closed: ₹${data.premiumClosed.toLocaleString('en-IN')}
+                                <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Closed: ₹${data.totalClosedPrem.toLocaleString('en-IN')}
                             </span>
                             <span class="bg-cyan-950 border border-cyan-800 text-cyan-300 text-xs font-bold px-2.5 py-1 rounded-xl">
-                                Total: ${data.total}
+                                Total CT: ${data.total}
                             </span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-4 gap-2 text-center">
+                    <div class="grid grid-cols-5 gap-2 text-center">
                         <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[10px] text-slate-400 uppercase font-bold">New Lead</span>
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">New Lead</span>
                             <span class="text-sm font-black text-indigo-400">${data.newLead}</span>
                         </div>
                         <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Follow up</span>
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Follow up</span>
                             <span class="text-sm font-black text-amber-400">${data.followup}</span>
                         </div>
                         <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Closed</span>
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">No Contact</span>
+                            <span class="text-sm font-black text-purple-400">${data.noContact}</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Closed</span>
                             <span class="text-sm font-black text-sky-400">${data.closed}</span>
                         </div>
                         <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Not Int.</span>
+                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Not Int.</span>
                             <span class="text-sm font-black text-rose-400">${data.notInterested}</span>
                         </div>
                     </div>
@@ -230,7 +361,7 @@
             document.getElementById('totalSheetEntries').innerText = `${leads.length} Entries`;
 
             if (leads.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="19" class="text-center py-4 text-slate-500">No entries found in sheet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="28" class="text-center py-4 text-slate-500">No entries found in sheet.</td></tr>`;
                 return;
             }
 
@@ -239,44 +370,53 @@
                 tr.className = "hover:bg-slate-800/50 transition";
                 tr.innerHTML = `
                     <td class="p-2 font-bold">${l.sNo || index + 1}</td>
-                    <td class="p-2">${formatDate(l.date)}</td>
-                    <td class="p-2">${l.location || 'Mumbai-2'}</td>
+                    <td class="p-2">${formatDate(l.ctDate)}</td>
+                    <td class="p-2">${l.unit || 'Mumbai-2'}</td>
+                    <td class="p-2">${l.customerType || 'Prime'}</td>
+                    <td class="p-2">${l.custId || '-'}</td>
                     <td class="p-2 font-bold text-white">${l.customerName || '-'}</td>
-                    <td class="p-2">${l.phone || '-'}</td>
+                    <td class="p-2">${l.callMeetingType || 'Dialer/Call'}</td>
+                    <td class="p-2">${l.profiledRm || '-'}</td>
                     <td class="p-2">${l.illustration || '-'}</td>
                     <td class="p-2">${l.f2f || '-'}</td>
-                    <td class="p-2">${l.crm || '-'}</td>
-                    <td class="p-2 text-cyan-400 font-semibold">${l.fls || '-'}</td>
-                    <td class="p-2">${l.rmName || '-'}</td>
-                    <td class="p-2">${l.supervisorName || '-'}</td>
-                    <td class="p-2">${l.uhName || 'Amit Chodankar'}</td>
+                    <td class="p-2">${l.crmYn || '-'}</td>
+                    <td class="p-2">${l.crmReason || '-'}</td>
+                    <td class="p-2">${l.incomeSlab || '-'}</td>
+                    <td class="p-2">${l.acBal || '-'}</td>
+                    <td class="p-2">₹${l.premPitched || '0'}</td>
+                    <td class="p-2 text-emerald-400 font-bold">₹${l.expectedPremium || '0'}</td>
+                    <td class="p-2 text-cyan-300">${l.planPitched || '-'}</td>
                     <td class="p-2 font-bold">${l.status || '-'}</td>
+                    <td class="p-2">${l.vrbhInformed || '-'}</td>
                     <td class="p-2">${formatDate(l.followupDate)}</td>
-                    <td class="p-2">₹${l.expectedPremium || '0'}</td>
-                    <td class="p-2">${formatDate(l.closerDate)}</td>
-                    <td class="p-2 text-emerald-400 font-bold">₹${l.premiumClosed || '0'}</td>
-                    <td class="p-2 italic text-slate-400">${l.dateWithRemark || '-'}</td>
-                    <td class="p-2 text-cyan-300 font-mono">${l.financials || '-'}</td>
+                    <td class="p-2 text-cyan-400 font-semibold">${l.fls || '-'}</td>
+                    <td class="p-2">${l.csmInsurer || 'ABSLI'}</td>
+                    <td class="p-2 italic text-slate-400">${l.remark || '-'}</td>
+                    <td class="p-2">${l.l1Spoken || '-'}</td>
+                    <td class="p-2">${l.l1Remarks || '-'}</td>
+                    <td class="p-2">${l.rmName || '-'}</td>
+                    <td class="p-2 text-amber-400 font-semibold">${l.vrbh || '-'}</td>
+                    <td class="p-2">${l.uhName || 'Amit Chodankar'}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
         function updateBadge() {
-            const followupCount = leads.filter(l => l.status === 'Follow up').length;
+            const followupCount = leads.filter(l => (l.status || '').toLowerCase().includes('follow')).length;
             document.getElementById('badgeCount').innerText = followupCount;
         }
 
         function exportToCSV() {
             if (leads.length === 0) { alert('No data to export.'); return; }
-            let csv = "S No,Date,Location,Customer Name,Phone,Illustration,F2F,CRM,FLS,RM Name,Supervisor Name,UH Name,Status,Followup Date,Expected Premium,Closer Date,Premium Closed,Date with Remark,CTC || AC Bal || CC Limit\n";
+            let csv = "Sr No,CT Date,Unit,Customer Type,Cust ID (If UH Allows),Customer Name,Call/Meeting Type,Profiled & CT Trasnfer by RM Y/N,Illustration sent,F2F Done,CRM Y/N,CRM If N - Reason,Income Slab,Customer A/C Bal / CC LIM / FD,Premium Pitched,Expected Premium,Plan Pitched,CT/Lead Status,IF NI/NC Lead Is VRBH/UH Informed,Followup Date,FLS - Insurer,CSM- Insurer,FLS Detailed Lead Remark & Date,L1 Insurer CSM/TM Spoken to Customer (CSM),LI 1 Insurer CSM/ TM Lead Remaks,RM Name,VRBH,UH Name\n";
             leads.forEach(l => {
-                csv += `"${l.sNo}","${l.date || ''}","${l.location || 'Mumbai-2'}","${l.customerName}","${l.phone}","${l.illustration || ''}","${l.f2f || ''}","${l.crm || ''}","${l.fls || ''}","${l.rmName || ''}","${l.supervisorName || ''}","${l.uhName || 'Amit Chodankar'}","${l.status}","${l.followupDate || ''}","${l.expectedPremium || ''}","${l.closerDate || ''}","${l.premiumClosed || ''}","${l.dateWithRemark || ''}","${l.financials || ''}"\n`;
+                csv += `"${l.sNo || ''}","${l.ctDate || ''}","${l.unit || 'Mumbai-2'}","${l.customerType || 'Prime'}","${l.custId || ''}","${l.customerName || ''}","${l.callMeetingType || 'Dialer/Call'}","${l.profiledRm || ''}","${l.illustration || ''}","${l.f2f || ''}","${l.crmYn || ''}","${l.crmReason || ''}","${l.incomeSlab || ''}","${l.acBal || ''}","${l.premPitched || ''}","${l.expectedPremium || ''}","${l.planPitched || ''}","${l.status || ''}","${l.vrbhInformed || ''}","${l.followupDate || ''}","${l.fls || ''}","${l.csmInsurer || 'ABSLI'}","${l.remark || ''}","${l.l1Spoken || ''}","${l.l1Remarks || ''}","${l.rmName || ''}","${l.vrbh || ''}","${l.uhName || 'Amit Chodankar'}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "complete_sheet_summary.csv");
+            link.setAttribute("download", "complete_sheet_summary_28cols.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -284,3 +424,4 @@
     </script>
 </body>
 </html>
+
