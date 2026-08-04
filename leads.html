@@ -339,6 +339,17 @@
             }
         }
 
+        // Helper to cleanly extract local YYYY-MM-DD without timezone shift
+        function getLocalDateString(dateInput) {
+            if (!dateInput) return "";
+            let d = new Date(dateInput);
+            if (isNaN(d.getTime())) return "";
+            let year = d.getFullYear();
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         async function fetchLeadsFromSheet() {
             try {
                 let response = await fetch(WEB_APP_URL);
@@ -478,11 +489,8 @@
             document.getElementById('editRowIndex').value = '';
             document.getElementById('fSrNo').value = leads.length + 1;
             
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            document.getElementById('fCtDate').value = `${year}-${month}-${day}`;
+            // Set local today date correctly without timezone shift
+            document.getElementById('fCtDate').value = getLocalDateString(new Date());
 
             document.getElementById('fUnit').value = 'Mumbai-2';
             document.getElementById('fCustomerType').value = 'Prime';
@@ -559,7 +567,7 @@
 
             document.getElementById('editRowIndex').value = lead.rowIndex;
             document.getElementById('fSrNo').value = lead.sNo || '';
-            document.getElementById('fCtDate').value = lead.ctDate ? lead.ctDate.split('T')[0] : '';
+            document.getElementById('fCtDate').value = getLocalDateString(lead.ctDate);
             document.getElementById('fUnit').value = lead.unit || 'Mumbai-2';
             document.getElementById('fCustomerType').value = 'Prime';
             document.getElementById('fCustId').value = lead.custId || '';
@@ -577,7 +585,7 @@
             document.getElementById('fPlanPitched').value = lead.planPitched || '';
             document.getElementById('fStatus').value = lead.status || 'New Lead';
             document.getElementById('fVrbhInformed').value = lead.vrbhInformed || 'Y';
-            document.getElementById('fFollowupDate').value = lead.followupDate ? lead.followupDate.split('T')[0] : '';
+            document.getElementById('fFollowupDate').value = getLocalDateString(lead.followupDate);
             document.getElementById('fFLS').value = lead.fls || 'Mahfuz';
             document.getElementById('fCsmInsurer').value = 'ABSLI';
             document.getElementById('fRemark').value = lead.remark || '';
@@ -629,4 +637,3 @@
     </script>
 </body>
 </html>
-
