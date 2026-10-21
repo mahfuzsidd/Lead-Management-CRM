@@ -8,27 +8,190 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        html { color-scheme: light; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #e6eeff;
+            color: #07102b;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ===== text colors (high contrast on frost glass) ===== */
+        .text-ink  { color: #07102b; }
+        .text-sub  { color: #334155; }
+        .text-sub2 { color: #475569; }
+        .text-acc  { color: #1d4ed8; }
+        .text-amb  { color: #92400e; }
+        .text-emr  { color: #047857; }
+        .text-ros  { color: #be123c; }
+        .text-on   { color: #ffffff; }
+
+        /* status number colors */
+        .c-new    { color: #3730a3; }
+        .c-follow { color: #92400e; }
+        .c-nc     { color: #6b21a8; }
+        .c-closed { color: #075985; }
+        .c-ni     { color: #9f1239; }
+
+        /* ================= LIQUID BACKDROP ================= */
+        .lg-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(160deg, #eaf1ff 0%, #e2ebfc 50%, #f1e9fb 100%);
+        }
+        .lg-orb { position: absolute; border-radius: 9999px; filter: blur(70px); will-change: transform; }
+        .lg-orb.o1 { width: max(300px, 30vmax); height: max(300px, 30vmax); top: -8%; left: -6%;
+            background: #4f8dff; opacity: .55; animation: drift1 24s ease-in-out infinite alternate; }
+        .lg-orb.o2 { width: max(320px, 32vmax); height: max(320px, 32vmax); bottom: -12%; right: -8%;
+            background: #ff8fc2; opacity: .5; animation: drift2 28s ease-in-out infinite alternate; }
+        .lg-orb.o3 { width: max(220px, 22vmax); height: max(220px, 22vmax); top: 42%; left: 48%;
+            background: #ffd166; opacity: .45; animation: drift3 26s ease-in-out infinite alternate; }
+        .lg-orb.o4 { width: max(240px, 24vmax); height: max(240px, 24vmax); top: 55%; left: -6%;
+            background: #7dd3fc; opacity: .4; animation: drift2 30s ease-in-out infinite alternate-reverse; }
+        @keyframes drift1 { to { transform: translate(8vw, 10vh) scale(1.12); } }
+        @keyframes drift2 { to { transform: translate(-8vw, -9vh) scale(1.1); } }
+        @keyframes drift3 { to { transform: translate(-10vw, 8vh) scale(1.15); } }
+        @media (prefers-reduced-motion: reduce) { .lg-orb { animation: none !important; } }
+
+        /* ================= GLASS SURFACES ================= */
+        .glass {
+            background: rgba(255, 255, 255, 0.62);
+            -webkit-backdrop-filter: blur(22px) saturate(180%);
+            backdrop-filter: blur(22px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.18), inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(255,255,255,0.5);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.68);
+            -webkit-backdrop-filter: blur(16px) saturate(170%);
+            backdrop-filter: blur(16px) saturate(170%);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 24px rgba(30, 58, 138, 0.14), inset 0 1px 0 #ffffff;
+        }
+        .glass-hero {
+            background: rgba(255, 255, 255, 0.7);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(29, 78, 216, 0.35);
+            box-shadow: 0 14px 38px rgba(29, 78, 216, 0.22), inset 0 1px 0 #ffffff;
+        }
+        .glass-inset {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+
+        /* ================= BUTTONS / PILLS ================= */
+        .btn-glass {
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.28), inset 0 1px 0 rgba(255,255,255,0.55);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            transition: transform .15s ease, filter .2s ease;
+        }
+        .btn-glass:hover { filter: brightness(1.08); }
+        .btn-glass:active { transform: scale(0.96); }
+        .btn-emerald { background: linear-gradient(180deg, #10b981, #047857); }
+
+        .pill-money {
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(4,120,87,0.4);
+            color: #047857;
+            box-shadow: inset 0 1px 0 #fff;
+        }
+        .pill-total {
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 4px 12px rgba(29,78,216,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .pill-total-soft {
+            background: rgba(29,78,216,0.1);
+            border: 1px solid rgba(29,78,216,0.4);
+            color: #1e3a8a;
+        }
+        .icon-box {
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+            color: #ffffff;
+            box-shadow: 0 6px 14px rgba(29,78,216,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .icon-round { background: rgba(29,78,216,0.12); color: #1d4ed8; border: 1px solid rgba(29,78,216,0.3); }
+
+        /* ================= TABLE ================= */
+        .sheet-table thead { background: rgba(255,255,255,0.9); color: #475569; }
+        .sheet-table th { font-weight: 800; }
+        .sheet-table tbody tr { border-bottom: 1px solid rgba(15,23,42,0.08); }
+        .row-hover { transition: background .15s ease; }
+        .row-hover:hover { background: rgba(29, 78, 216, 0.07); }
+
+        /* ================= NAV ================= */
+        .nav-glass { border-radius: 26px; }
+        .nav-item { padding: 6px 14px; border-radius: 18px; transition: background .2s ease, color .2s ease; }
+        .nav-item.active {
+            background: rgba(29, 78, 216, 0.12);
+            border: 1px solid rgba(29, 78, 216, 0.35);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* ================= RESPONSIVE LAYOUT ================= */
+        .page-wrap { width: 100%; max-width: 28rem; margin-left: auto; margin-right: auto; }
+        .nav-wrap { max-width: 28rem; }
+        @media (min-width: 640px) { .page-wrap { max-width: 56rem; } }
+        @media (min-width: 768px) {
+            .page-wrap { max-width: none; }
+            .nav-wrap { max-width: 34rem; }
+            #flsSummaryContainer {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+                gap: 16px;
+            }
+            #flsSummaryContainer > * { margin: 0 !important; }
+            #flsSummaryContainer > p { grid-column: 1 / -1; }
+        }
+        @media (min-width: 1024px) {
+            html { font-size: 17px; }
+            .sheet-table { font-size: 12.5px; }
+        }
+
+        /* ================= MISC ================= */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.25); border-radius: 9999px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::selection { background: rgba(29,78,216,0.25); }
     </style>
 </head>
-<body class="bg-[#0b192c] text-white min-h-screen pb-28">
+<body class="text-ink min-h-screen pb-32">
+
+    <!-- LIQUID BACKDROP -->
+    <div class="lg-backdrop" aria-hidden="true">
+        <div class="lg-orb o1"></div>
+        <div class="lg-orb o2"></div>
+        <div class="lg-orb o3"></div>
+        <div class="lg-orb o4"></div>
+    </div>
 
     <!-- FLOATING TOP HEADER BAR -->
-    <div class="sticky top-3 z-40 px-4 mb-3">
-        <div class="max-w-4xl mx-auto bg-[#0b192c]/90 backdrop-blur-md border border-slate-700/85 shadow-2xl rounded-2xl px-4 py-2.5 flex justify-between items-center">
+    <div class="sticky top-3 z-40 px-4 md:px-8 mb-3">
+        <div class="page-wrap glass rounded-2xl px-4 py-2.5 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <a href="index.html" class="text-lg text-slate-300 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
-                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">FLS Performance Summary (28 Columns)</span>
+                <a href="index.html" class="text-lg text-sub hover:text-blue-800"><i class="fa-solid fa-arrow-left"></i></a>
+                <span class="text-xs font-bold text-acc uppercase tracking-wider">FLS Performance Summary (28 Columns)</span>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center space-x-1">
+                <button onclick="exportToCSV()" class="btn-glass btn-emerald text-xs font-bold px-3 py-1.5 rounded-xl flex items-center space-x-1">
                     <i class="fa-solid fa-download text-[10px]"></i> <span>Export Excel</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto p-4 pt-1">
+    <div class="page-wrap p-4 md:px-8 pt-1">
 
         <!-- Overall Total Performance Summary Card (Top Priority) -->
         <div id="overallSummaryContainer" class="mb-6">
@@ -37,25 +200,25 @@
 
         <!-- FLS Summary Cards Section -->
         <div class="mb-6">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">FLS-Wise Performance & Status Counts (Sorted by CT Count)</h3>
+            <h3 class="text-xs font-bold text-sub uppercase tracking-wider mb-3 px-1">FLS-Wise Performance & Status Counts (Sorted by CT Count)</h3>
             <div id="flsSummaryContainer" class="space-y-4">
-                <p class="text-xs text-slate-400 text-center py-4">Loading FLS summary from Google Sheet...</p>
+                <p class="text-xs text-sub2 text-center py-4">Loading FLS summary from Google Sheet...</p>
             </div>
         </div>
 
         <!-- Horizontal Border Separator -->
-        <div class="border-t border-slate-700 my-6"></div>
+        <div class="border-t border-slate-900/10 my-6"></div>
 
         <!-- Excel-Like Complete Sheet Table View (28 Columns) -->
-        <div class="bg-[#10223b] p-4 rounded-2xl border border-slate-700/50 shadow-xl">
-            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
-                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Complete Sheet Data (28 Columns View)</h3>
-                <span id="totalSheetEntries" class="text-[11px] text-cyan-400 font-semibold">0 Entries</span>
+        <div class="glass p-4 rounded-3xl">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-900/10">
+                <h3 class="text-xs font-bold text-sub uppercase tracking-wider">Complete Sheet Data (28 Columns View)</h3>
+                <span id="totalSheetEntries" class="text-[11px] text-acc font-semibold">0 Entries</span>
             </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-[11px] text-slate-300 whitespace-nowrap">
-                    <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-700">
+
+            <div class="overflow-x-auto rounded-xl">
+                <table class="sheet-table w-full text-left text-[11px] text-sub whitespace-nowrap">
+                    <thead class="uppercase text-[10px] border-b border-slate-900/15">
                         <tr>
                             <th class="p-2">Sr No</th>
                             <th class="p-2">CT Date</th>
@@ -87,9 +250,9 @@
                             <th class="p-2">UH Name</th>
                         </tr>
                     </thead>
-                    <tbody id="sheetTableBody" class="divide-y divide-slate-800">
+                    <tbody id="sheetTableBody">
                         <tr>
-                            <td colspan="28" class="text-center py-4 text-slate-400">Loading sheet rows...</td>
+                            <td colspan="28" class="text-center py-4 text-sub2">Loading sheet rows...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -99,21 +262,21 @@
     </div>
 
     <!-- Bottom Navigation Bar with Labels -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#071321] border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40">
-        <a href="index.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+    <nav class="glass nav-glass nav-wrap fixed bottom-3 left-4 right-4 mx-auto px-2 py-2 flex justify-around items-center z-40">
+        <a href="index.html" class="nav-item text-sub hover:text-blue-800 flex flex-col items-center space-y-1">
             <i class="fa-solid fa-house text-base"></i>
             <span class="text-[10px] font-medium">Home</span>
         </a>
-        <a href="leads.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+        <a href="leads.html" class="nav-item text-sub hover:text-blue-800 flex flex-col items-center space-y-1">
             <i class="fa-solid fa-user-group text-base"></i>
             <span class="text-[10px] font-medium">Leads</span>
         </a>
-        <a href="summary.html" class="text-cyan-400 flex flex-col items-center space-y-1 relative">
+        <a href="summary.html" class="nav-item active text-acc flex flex-col items-center space-y-1 relative">
             <i class="fa-solid fa-list-check text-base"></i>
-            <span class="absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-bold px-1 rounded-full" id="badgeCount">0</span>
+            <span class="absolute -top-1 -right-1 bg-rose-500/90 text-on text-[9px] font-bold px-1 rounded-full shadow" id="badgeCount">0</span>
             <span class="text-[10px] font-medium">Summary</span>
         </a>
-        <a href="calendar.html" class="text-slate-400 hover:text-white flex flex-col items-center space-y-1">
+        <a href="calendar.html" class="nav-item text-sub hover:text-blue-800 flex flex-col items-center space-y-1">
             <i class="fa-solid fa-calendar text-base"></i>
             <span class="text-[10px] font-medium">Calendar</span>
         </a>
@@ -185,9 +348,9 @@
                 updateBadge();
             } catch (error) {
                 console.error("Error fetching sheet data:", error);
-                document.getElementById('overallSummaryContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-2">Failed to load overall summary.</p>`;
-                document.getElementById('flsSummaryContainer').innerHTML = `<p class="text-xs text-rose-400 text-center py-4">Failed to load FLS data.</p>`;
-                document.getElementById('sheetTableBody').innerHTML = `<tr><td colspan="28" class="text-center py-4 text-rose-400">Failed to load table rows.</td></tr>`;
+                document.getElementById('overallSummaryContainer').innerHTML = `<p class="text-xs text-ros text-center py-2">Failed to load overall summary.</p>`;
+                document.getElementById('flsSummaryContainer').innerHTML = `<p class="text-xs text-ros text-center py-4">Failed to load FLS data.</p>`;
+                document.getElementById('sheetTableBody').innerHTML = `<tr><td colspan="28" class="text-center py-4 text-ros">Failed to load table rows.</td></tr>`;
             }
         }
 
@@ -217,48 +380,48 @@
 
             container.innerHTML = `
                 <div class="mb-2">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Overall Unit Performance Summary</h3>
+                    <h3 class="text-xs font-bold text-sub uppercase tracking-wider px-1">Overall Unit Performance Summary</h3>
                 </div>
-                <div class="bg-gradient-to-r from-[#10223b] to-[#183156] p-4 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col space-y-3">
-                    <div class="flex justify-between items-center pb-2 border-b border-slate-700/80">
+                <div class="glass-hero p-4 rounded-3xl flex flex-col space-y-3">
+                    <div class="flex flex-wrap gap-2 justify-between items-center pb-2 border-b border-slate-900/10">
                         <div class="flex items-center space-x-2.5">
-                            <div class="w-9 h-9 rounded-xl bg-cyan-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-lg">
+                            <div class="icon-box w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm">
                                 <i class="fa-solid fa-chart-pie"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-extrabold text-white tracking-wide">Total Unit Overview</h4>
-                                <p class="text-[10px] text-cyan-300 font-medium">Aggregated metrics across all FLS</p>
+                                <h4 class="text-sm font-extrabold text-ink tracking-wide">Total Unit Overview</h4>
+                                <p class="text-[10px] text-acc font-semibold">Aggregated metrics across all FLS</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="bg-slate-900/90 border border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 shadow">
+                            <span class="pill-money px-3.5 py-1.5 rounded-xl text-xs font-bold">
                                 <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Closed: ₹${totalClosedPrem.toLocaleString('en-IN')}
                             </span>
-                            <span class="bg-cyan-500 text-slate-950 text-xs font-extrabold px-3 py-1.5 rounded-xl shadow">
+                            <span class="pill-total text-xs font-extrabold px-3 py-1.5 rounded-xl">
                                 Total CT: ${total}
                             </span>
                         </div>
                     </div>
                     <div class="grid grid-cols-5 gap-2 text-center">
-                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">New Lead</span>
-                            <span class="text-base font-black text-indigo-400">${newLead}</span>
+                        <div class="glass-inset p-2.5 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">New Lead</span>
+                            <span class="text-lg font-black c-new">${newLead}</span>
                         </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Follow up</span>
-                            <span class="text-base font-black text-amber-400">${followup}</span>
+                        <div class="glass-inset p-2.5 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">Follow up</span>
+                            <span class="text-lg font-black c-follow">${followup}</span>
                         </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">No Contact</span>
-                            <span class="text-base font-black text-purple-400">${noContact}</span>
+                        <div class="glass-inset p-2.5 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">No Contact</span>
+                            <span class="text-lg font-black c-nc">${noContact}</span>
                         </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Closed</span>
-                            <span class="text-base font-black text-sky-400">${closed}</span>
+                        <div class="glass-inset p-2.5 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">Closed</span>
+                            <span class="text-lg font-black c-closed">${closed}</span>
                         </div>
-                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/50 shadow-inner">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Not Int.</span>
-                            <span class="text-base font-black text-rose-400">${notInterested}</span>
+                        <div class="glass-inset p-2.5 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">Not Int.</span>
+                            <span class="text-lg font-black c-ni">${notInterested}</span>
                         </div>
                     </div>
                 </div>
@@ -303,51 +466,51 @@
             });
 
             if (sortedFlsKeys.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No FLS data available.</p>`;
+                container.innerHTML = `<p class="text-xs text-sub2 text-center py-4">No FLS data available.</p>`;
                 return;
             }
 
             sortedFlsKeys.forEach(fls => {
                 let data = flsGroups[fls];
                 let card = document.createElement('div');
-                card.className = "bg-[#10223b] p-4 rounded-2xl border border-slate-700/60 shadow-lg flex flex-col space-y-3";
+                card.className = "glass-card p-4 rounded-3xl flex flex-col space-y-3";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                    <div class="flex flex-wrap gap-2 justify-between items-center pb-2 border-b border-slate-900/10">
                         <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+                            <div class="icon-round w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">
                                 <i class="fa-solid fa-user-tie"></i>
                             </div>
-                            <h4 class="text-sm font-extrabold text-white">${fls}</h4>
+                            <h4 class="text-base font-extrabold text-ink">${fls}</h4>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="bg-slate-900 border border-slate-700 px-3 py-1 rounded-xl text-xs font-bold text-emerald-400 shadow">
+                            <span class="pill-money px-3 py-1 rounded-xl text-xs font-bold">
                                 <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i> Closed: ₹${data.totalClosedPrem.toLocaleString('en-IN')}
                             </span>
-                            <span class="bg-cyan-950 border border-cyan-800 text-cyan-300 text-xs font-bold px-2.5 py-1 rounded-xl">
+                            <span class="pill-total-soft text-xs font-bold px-2.5 py-1 rounded-xl">
                                 Total CT: ${data.total}
                             </span>
                         </div>
                     </div>
                     <div class="grid grid-cols-5 gap-2 text-center">
-                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">New Lead</span>
-                            <span class="text-sm font-black text-indigo-400">${data.newLead}</span>
+                        <div class="glass-inset p-2 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">New Lead</span>
+                            <span class="text-base font-black c-new">${data.newLead}</span>
                         </div>
-                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Follow up</span>
-                            <span class="text-sm font-black text-amber-400">${data.followup}</span>
+                        <div class="glass-inset p-2 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">Follow up</span>
+                            <span class="text-base font-black c-follow">${data.followup}</span>
                         </div>
-                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">No Contact</span>
-                            <span class="text-sm font-black text-purple-400">${data.noContact}</span>
+                        <div class="glass-inset p-2 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">No Contact</span>
+                            <span class="text-base font-black c-nc">${data.noContact}</span>
                         </div>
-                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Closed</span>
-                            <span class="text-sm font-black text-sky-400">${data.closed}</span>
+                        <div class="glass-inset p-2 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">Closed</span>
+                            <span class="text-base font-black c-closed">${data.closed}</span>
                         </div>
-                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-                            <span class="block text-[9px] text-slate-400 uppercase font-bold">Not Int.</span>
-                            <span class="text-sm font-black text-rose-400">${data.notInterested}</span>
+                        <div class="glass-inset p-2 rounded-xl">
+                            <span class="block text-[9px] text-sub2 uppercase font-bold">Not Int.</span>
+                            <span class="text-base font-black c-ni">${data.notInterested}</span>
                         </div>
                     </div>
                 `;
@@ -361,20 +524,20 @@
             document.getElementById('totalSheetEntries').innerText = `${leads.length} Entries`;
 
             if (leads.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="28" class="text-center py-4 text-slate-500">No entries found in sheet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="28" class="text-center py-4 text-sub2">No entries found in sheet.</td></tr>`;
                 return;
             }
 
             leads.forEach((l, index) => {
                 let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/50 transition";
+                tr.className = "row-hover";
                 tr.innerHTML = `
                     <td class="p-2 font-bold">${l.sNo || index + 1}</td>
                     <td class="p-2">${formatDate(l.ctDate)}</td>
                     <td class="p-2">${l.unit || 'Mumbai-2'}</td>
                     <td class="p-2">${l.customerType || 'Prime'}</td>
                     <td class="p-2">${l.custId || '-'}</td>
-                    <td class="p-2 font-bold text-white">${l.customerName || '-'}</td>
+                    <td class="p-2 font-extrabold text-ink">${l.customerName || '-'}</td>
                     <td class="p-2">${l.callMeetingType || 'Dialer/Call'}</td>
                     <td class="p-2">${l.profiledRm || '-'}</td>
                     <td class="p-2">${l.illustration || '-'}</td>
@@ -384,18 +547,18 @@
                     <td class="p-2">${l.incomeSlab || '-'}</td>
                     <td class="p-2">${l.acBal || '-'}</td>
                     <td class="p-2">₹${l.premPitched || '0'}</td>
-                    <td class="p-2 text-emerald-400 font-bold">₹${l.expectedPremium || '0'}</td>
-                    <td class="p-2 text-cyan-300">${l.planPitched || '-'}</td>
-                    <td class="p-2 font-bold">${l.status || '-'}</td>
+                    <td class="p-2 text-emr font-bold">₹${l.expectedPremium || '0'}</td>
+                    <td class="p-2 text-acc">${l.planPitched || '-'}</td>
+                    <td class="p-2 font-bold text-ink">${l.status || '-'}</td>
                     <td class="p-2">${l.vrbhInformed || '-'}</td>
                     <td class="p-2">${formatDate(l.followupDate)}</td>
-                    <td class="p-2 text-cyan-400 font-semibold">${l.fls || '-'}</td>
+                    <td class="p-2 text-acc font-semibold">${l.fls || '-'}</td>
                     <td class="p-2">${l.csmInsurer || 'ABSLI'}</td>
-                    <td class="p-2 italic text-slate-400">${l.remark || '-'}</td>
+                    <td class="p-2 italic text-sub2">${l.remark || '-'}</td>
                     <td class="p-2">${l.l1Spoken || '-'}</td>
                     <td class="p-2">${l.l1Remarks || '-'}</td>
                     <td class="p-2">${l.rmName || '-'}</td>
-                    <td class="p-2 text-amber-400 font-semibold">${l.vrbh || '-'}</td>
+                    <td class="p-2 text-amb font-semibold">${l.vrbh || '-'}</td>
                     <td class="p-2">${l.uhName || 'Amit Chodankar'}</td>
                 `;
                 tbody.appendChild(tr);
@@ -424,4 +587,3 @@
     </script>
 </body>
 </html>
-
